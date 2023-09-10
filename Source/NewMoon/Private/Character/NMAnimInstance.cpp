@@ -5,6 +5,7 @@
 
 #include "Character/NMCharacter.h"
 #include "KismetAnimationLibrary.h"
+#include "Character/NMCharacterMovementComponent.h"
 
 void UNMAnimInstance::NativeInitializeAnimation()
 {
@@ -24,12 +25,18 @@ void UNMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!::IsValid(NMCharacter)) return;
 
 
-	FVector Velocity = NMCharacter->GetVelocity();
+	Velocity = NMCharacter->GetVelocity();
 	Direction = UKismetAnimationLibrary::CalculateDirection(Velocity, NMCharacter->GetActorRotation());
 	Velocity.Z = 0.0f;
 	Speed = Velocity.Size();
 
 
-	bIsInAir = NMCharacter->GetMovementComponent()->IsFalling();
+	if (UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(NMCharacter->GetCharacterMovement()))
+	{
+		bIsInAir = CharacterMovementComponent->IsFalling();
+		bIsCrouched = CharacterMovementComponent->bIsCrouched;
+		bIsProne = CharacterMovementComponent->bIsProne;
+		CurrentCharacterMotion = CharacterMovementComponent->GetCurrentCharacterMotion();
+	}
 	
 }
