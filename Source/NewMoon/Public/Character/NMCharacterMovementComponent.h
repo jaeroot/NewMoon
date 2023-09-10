@@ -37,9 +37,16 @@ public:
 	float StandWalkSpeed;
 	float CrouchWalkSpeed;
 	float ProneWalkSpeed;
+
+	UPROPERTY(Replicated)
+	bool CrouchPlaying = false;
+	
+	UPROPERTY(Replicated)
+	bool PronePlaying = false;
 	
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentCharacterMotion, VisibleAnywhere, Category = "Character Movement")
 	ECharacterMotion CurrentCharacterMotion;
+
 	
 };

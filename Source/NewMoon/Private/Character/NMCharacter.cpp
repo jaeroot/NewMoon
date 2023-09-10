@@ -286,25 +286,10 @@ void ANMCharacter::CameraRotFinish()
 
 void ANMCharacter::CrouchInterp_Implementation(float Value)
 {
-	GetCapsuleComponent()->SetCapsuleHalfHeight(FMath::Lerp(100.0f, 70.0f, Value));
-	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, FMath::Lerp(-100.0f, -70.0f, Value)));
-	CacheInitialMeshOffset(FVector(0.0f, 0.0f, FMath::Lerp(-100.0f, -70.0f, Value)), FRotator(0.0f, -90.0f, 0.0f));
+	GetCapsuleComponent()->SetCapsuleHalfHeight(FMath::Lerp(StandHalfHeight, CrouchHalfHeight, Value));
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, FMath::Lerp(-StandHalfHeight, -CrouchHalfHeight, Value)));
+	CacheInitialMeshOffset(FVector(0.0f, 0.0f, FMath::Lerp(-StandHalfHeight, -CrouchHalfHeight, Value)), FRotator(0.0f, -90.0f, 0.0f));
 	
-}
-
-void ANMCharacter::ProneFinish_Implementation()
-{
-	if (UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(GetCharacterMovement()))
-	{
-		CharacterMovementComponent->SetWalkSpeed();
-	}
-}
-
-void ANMCharacter::ProneInterp_Implementation(float Value)
-{
-	GetCapsuleComponent()->SetCapsuleHalfHeight(FMath::Lerp(100.0f, 45.0f, Value));
-	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, FMath::Lerp(-100.0f, -45.0f, Value)));
-	CacheInitialMeshOffset(FVector(0.0f, 0.0f, FMath::Lerp(-100.0f, -45.0f, Value)), FRotator(0.0f, -90.0f, 0.0f));
 }
 
 void ANMCharacter::CrouchFinish_Implementation()
@@ -312,6 +297,27 @@ void ANMCharacter::CrouchFinish_Implementation()
 	if (UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(GetCharacterMovement()))
 	{
 		CharacterMovementComponent->SetWalkSpeed();
+
+		if (HasAuthority())
+			CharacterMovementComponent->CrouchPlaying = false;
+	}
+}
+
+void ANMCharacter::ProneInterp_Implementation(float Value)
+{
+	GetCapsuleComponent()->SetCapsuleHalfHeight(FMath::Lerp(StandHalfHeight, ProneHalfHeight, Value));
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, FMath::Lerp(-StandHalfHeight, -ProneHalfHeight, Value)));
+	CacheInitialMeshOffset(FVector(0.0f, 0.0f, FMath::Lerp(-StandHalfHeight, -ProneHalfHeight, Value)), FRotator(0.0f, -90.0f, 0.0f));
+}
+
+void ANMCharacter::ProneFinish_Implementation()
+{
+	if (UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(GetCharacterMovement()))
+	{
+		CharacterMovementComponent->SetWalkSpeed();
+		
+		if (HasAuthority())
+			CharacterMovementComponent->PronePlaying = false;
 	}
 }
 

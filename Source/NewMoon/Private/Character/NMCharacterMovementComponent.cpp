@@ -21,6 +21,8 @@ void UNMCharacterMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	DOREPLIFETIME(UNMCharacterMovementComponent, CurrentCharacterMotion);
 	DOREPLIFETIME(UNMCharacterMovementComponent, bIsCrouched);
 	DOREPLIFETIME(UNMCharacterMovementComponent, bIsProne);
+	DOREPLIFETIME(UNMCharacterMovementComponent, CrouchPlaying);
+	DOREPLIFETIME(UNMCharacterMovementComponent, PronePlaying);
 }
 
 void UNMCharacterMovementComponent::UpdateBasedMovement(float DeltaSeconds)
@@ -64,17 +66,29 @@ void UNMCharacterMovementComponent::SetCharacterMotion(ECharacterMotion NewChara
 	switch (CurrentCharacterMotion)
 	{
 	case ECharacterMotion::ECM_Stand:
-		Crouched ? bIsCrouched = false : bIsProne = false;
-		Crouched ? Character->CrouchTimeline->ReverseFromEnd() : Character->ProneTimeline->ReverseFromEnd();
+		if (Crouched)
+		{
+			bIsCrouched = false;
+			CrouchPlaying = true;
+			Character->CrouchTimeline->ReverseFromEnd();
+		}
+		else
+		{
+			bIsProne = false;
+			PronePlaying = true;
+			Character->ProneTimeline->ReverseFromEnd();
+		}
 		break;
 	case ECharacterMotion::ECM_Crouch:
 		bIsCrouched = true;
 		SetWalkSpeed();
+		CrouchPlaying = true;
 		Character->CrouchTimeline->PlayFromStart();
 		break;
 	case ECharacterMotion::ECM_Prone:
 		bIsProne = true;
 		SetWalkSpeed();
+		PronePlaying = true;
 		Character->ProneTimeline->PlayFromStart();
 		break;
 	default:
@@ -102,9 +116,10 @@ void UNMCharacterMovementComponent::OnRep_CurrentCharacterMotion(ECharacterMotio
 void UNMCharacterMovementComponent::DoCrouch()
 {
 	if (bIsProne)
-	{
 		return;
-	}
+
+	if (CrouchPlaying || PronePlaying)
+		return;
 	
 	ANMCharacter* Character = Cast<ANMCharacter>(GetCharacterOwner());
 	if (!Character)
@@ -126,9 +141,10 @@ void UNMCharacterMovementComponent::DoCrouch()
 void UNMCharacterMovementComponent::DoProne()
 {
 	if (bIsCrouched)
-	{
 		return;
-	}
+
+	if (CrouchPlaying || PronePlaying)
+		return;
 
 	ANMCharacter* Character = Cast<ANMCharacter>(GetCharacterOwner());
 	if (!Character)
