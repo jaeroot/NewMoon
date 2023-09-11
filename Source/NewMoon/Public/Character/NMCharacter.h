@@ -17,9 +17,10 @@ class NEWMOON_API ANMCharacter : public ACharacter
 
 public:
 	ANMCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void SetOverlappingWeapon(class AWeapon* Weapon);
 	
 	bool CheckCanStand(float HalfHeight);
 
@@ -49,6 +50,9 @@ private:
 	
 	UFUNCTION(Server, Reliable)
 	void ServerProneButtonPressed();
+
+	UFUNCTION(Server, Reliable)
+	void ServerInteractButtonPressed();
 	
 	FOnTimelineFloat CrouchTimelineFunction;
 	FOnTimelineEvent CrouchTimelineFinish;
@@ -76,6 +80,9 @@ private:
 
 	UFUNCTION()
 	void CameraRotFinish();
+	
+	UFUNCTION()
+	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 	
 	
 public:
@@ -112,5 +119,7 @@ private:
 	bool ControlRotationBlocked;
 	FRotator ControlRotation;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+	AWeapon* OverlappingWeapon;
 
 };

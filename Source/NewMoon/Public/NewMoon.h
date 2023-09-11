@@ -14,6 +14,16 @@ enum class ECharacterMotion : uint8
 	ECM_MAX UMETA(DisplayName = "DefaultMax")
 };
 
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	ECS_Idle UMETA(DisplayName = "Idle"),
+	ECS_Battle UMETA(DisplayName = "Battle"),
+	ECS_Dead UMETA(DisplayName = "Dead"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMax")
+};
+
 DECLARE_LOG_CATEGORY_EXTERN(NewMoon, Log, All);
 #define NMLOG_CALLINFO (FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))
 #define NMLOG_S(Verbosity) UE_LOG(NewMoon, Verbosity, TEXT("%s"), *NMLOG_CALLINFO)

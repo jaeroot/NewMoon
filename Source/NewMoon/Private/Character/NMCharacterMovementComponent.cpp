@@ -3,6 +3,7 @@
 
 #include "Character/NMCharacterMovementComponent.h"
 
+#include "AI/Tile.h"
 #include "Character/NMCharacter.h"
 #include "Net/UnrealNetwork.h"
 
@@ -27,8 +28,25 @@ void UNMCharacterMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 
 void UNMCharacterMovementComponent::UpdateBasedMovement(float DeltaSeconds)
 {
-	// Super::UpdateBasedMovement(DeltaSeconds);
-	return;
+	if (!HasValidData())
+	{
+		return;
+	}
+	
+	const UPrimitiveComponent* MovementBase = CharacterOwner->GetMovementBase();
+	if (!MovementBaseUtility::UseRelativeLocation(MovementBase))
+	{
+		return;
+	}
+
+	AActor* AttachmentRootActor = MovementBase->GetAttachmentRootActor();
+	if (AttachmentRootActor && AttachmentRootActor->IsA(ATile::StaticClass()))
+	{
+		NMLOG_S(Warning);
+		return;
+	}
+	
+	Super::UpdateBasedMovement(DeltaSeconds);
 }
 
 void UNMCharacterMovementComponent::SetWalkSpeed()

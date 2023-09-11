@@ -4,6 +4,7 @@
 #include "Character/NMCharacter.h"
 
 #include "Character/NMCharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UNMCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -43,7 +44,7 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	CameraRotTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("RotTimeline"));
 	CameraRotTimelineFunction.BindUFunction(this, FName("CameraRotInterp"));
 	CameraRotTimelineFinish.BindUFunction(this, FName("CameraRotFinish"));
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Camera_Rot_Curve(TEXT("/Game/Blueprints/Character/Animation/CameraRotCurve.CameraRotCurve"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Camera_Rot_Curve(TEXT("/Game/Blueprints/Character/Animations/CameraRotCurve.CameraRotCurve"));
 	if (Camera_Rot_Curve.Succeeded())
 	{
 		CameraRotCurve = Camera_Rot_Curve.Object;
@@ -66,7 +67,7 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	Camera->bUsePawnControlRotation = false;
 
 	// Set Animation
-	static ConstructorHelpers::FClassFinder<UAnimInstance> Mannequin_Anim(TEXT("/Game/Blueprints/Character/Animation/ABP_NMCharacter.ABP_NMCharacter_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> Mannequin_Anim(TEXT("/Game/Blueprints/Character/Animations/ABP_NMCharacter.ABP_NMCharacter_C"));
 	if (Mannequin_Anim.Succeeded())
 	{
 		GetMesh()->SetAnimInstanceClass(Mannequin_Anim.Class);
@@ -77,7 +78,7 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	CrouchTimelineFunction.BindUFunction(this, FName("CrouchInterp"));
 	CrouchTimelineFinish.BindUFunction(this, FName("CrouchFinish"));
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Crouch_Curve(TEXT("/Game/Blueprints/Character/Animation/CrouchCurve.CrouchCurve"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Crouch_Curve(TEXT("/Game/Blueprints/Character/Animations/CrouchCurve.CrouchCurve"));
 	if (Crouch_Curve.Succeeded())
 	{
 		CrouchCurve = Crouch_Curve.Object;
@@ -91,7 +92,7 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	ProneTimelineFunction.BindUFunction(this, FName("ProneInterp"));
 	ProneTimelineFinish.BindUFunction(this, FName("ProneFinish"));
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Prone_Curve(TEXT("/Game/Blueprints/Character/Animation/ProneCurve.ProneCurve"));
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> Prone_Curve(TEXT("/Game/Blueprints/Character/Animations/ProneCurve.ProneCurve"));
 	if (Crouch_Curve.Succeeded())
 	{
 		ProneCurve = Prone_Curve.Object;
@@ -99,6 +100,13 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 		ProneTimeline->SetTimelineFinishedFunc(ProneTimelineFinish);
 	}
 	ProneTimeline->SetLooping(false);
+}
+
+void ANMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(ANMCharacter, OverlappingWeapon, COND_OwnerOnly);
 }
 
 void ANMCharacter::BeginPlay()
@@ -132,7 +140,7 @@ void ANMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void ANMCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 void ANMCharacter::MoveForward(float Value)
@@ -166,9 +174,12 @@ void ANMCharacter::LookUp(float Value)
 }
 
 void ANMCharacter::Jump()
-{
+{	
 	UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(GetCharacterMovement());
 	if (!CharacterMovementComponent)
+		return;
+
+	if (CharacterMovementComponent->CrouchPlaying || CharacterMovementComponent->PronePlaying)
 		return;
 
 	switch (CharacterMovementComponent->GetCurrentCharacterMotion())
@@ -255,6 +266,12 @@ void ANMCharacter::AttackButtonPressed()
 
 void ANMCharacter::InteractButtonPressed()
 {
+	
+}
+
+void ANMCharacter::ServerInteractButtonPressed_Implementation()
+{
+	
 }
 
 void ANMCharacter::ControlRotationButtonPressed()
@@ -370,4 +387,24 @@ bool ANMCharacter::CheckCanStand(float HalfHeight)
 # endif
 
 	return bResult;
+}
+
+
+// 해야할것
+// ALT키 카메라 전환
+// 달리기
+// UI붙여서 앉기 눕기 중복 안되는거 표시하기
+// 무기 시스템 (투사체, 히트스캔, 칼, 맨손)
+// 체력 시스템
+// AI 시스템 (기본, 보스)
+// 탈것 시스템(자동차)
+// 인벤토리 시스템
+
+void ANMCharacter::SetOverlappingWeapon(AWeapon* Weapon)
+{
+	OverlappingWeapon = Weapon;
+}
+
+void ANMCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
 }
