@@ -42,7 +42,6 @@ void UNMCharacterMovementComponent::UpdateBasedMovement(float DeltaSeconds)
 	AActor* AttachmentRootActor = MovementBase->GetAttachmentRootActor();
 	if (AttachmentRootActor && AttachmentRootActor->IsA(ATile::StaticClass()))
 	{
-		NMLOG_S(Warning);
 		return;
 	}
 	

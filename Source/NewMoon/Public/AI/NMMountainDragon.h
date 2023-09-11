@@ -15,10 +15,33 @@ public:
 	ANMMountainDragon();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintCallable)
+	int GetHPPercentage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Attack();
+	
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UPROPERTY(Replicated)
+	bool bIsBattleState;
+	
+	UPROPERTY(Replicated)
+	bool bGlideAttack;
+	UPROPERTY(Replicated)
+	bool bFireBallAttack;
+	UPROPERTY(Replicated)
+	bool bFireSpreadAttack;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* AttackMontage;
 
 };
