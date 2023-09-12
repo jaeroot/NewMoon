@@ -23,6 +23,9 @@ public:
 	void SetOverlappingWeapon(class AWeapon* Weapon);
 	
 	bool CheckCanStand(float HalfHeight);
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsWeaponEquipped();
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,6 +46,9 @@ protected:
 	void InteractButtonPressed();
 	void ControlRotationButtonPressed();
 	void ControlRotationButtonReleased();
+	
+	UFUNCTION(BlueprintCallable)
+	float GetHPPercentage();
 
 private:
 	UFUNCTION(Server, Reliable)
@@ -86,6 +92,9 @@ private:
 	
 	
 public:
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UCameraComponent* Camera;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UTimelineComponent* CrouchTimeline;
 
@@ -95,17 +104,23 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UTimelineComponent* CameraRotTimeline;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
+	TSubclassOf<class UUserWidget> HPBarWidgetClass;
+	
+	UPROPERTY()
+	class UUserWidget* HPBarWidget;
+	
 	float StandHalfHeight;
 	float CrouchHalfHeight;
 	float ProneHalfHeight;
 	float Radius;
+	
+	UPROPERTY(VisibleAnywhere)
+	class UCombatComponent* Combat;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* SpringArm;
-
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	UCameraComponent* Camera;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UCurveFloat* CrouchCurve;

@@ -29,6 +29,7 @@ void UNMAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Direction = UKismetAnimationLibrary::CalculateDirection(Velocity, NMCharacter->GetActorRotation());
 	Velocity.Z = 0.0f;
 	Speed = Velocity.Size();
+	bWeaponEquipped = NMCharacter->IsWeaponEquipped();
 
 
 	if (UNMCharacterMovementComponent* CharacterMovementComponent = Cast<UNMCharacterMovementComponent>(NMCharacter->GetCharacterMovement()))

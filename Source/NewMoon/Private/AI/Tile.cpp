@@ -6,6 +6,7 @@
 ATile::ATile()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Tile(TEXT("/Game/Assets/Mesh/SM_Floor.SM_Floor"));

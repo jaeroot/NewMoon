@@ -26,6 +26,10 @@ public:
 	static const FName CanFireBallAttackKey;
 	static const FName CanFireSpreadAttackKey;
 	static const FName TargetKey;
+	static const FName BaseLocationKey;
+	static const FName FireLocationKey;
+	static const FName FireTargetKey;
+	static const FName GlideTargetKey;
 	
 private:
 	UPROPERTY()

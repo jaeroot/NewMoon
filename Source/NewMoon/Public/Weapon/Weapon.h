@@ -30,7 +30,8 @@ public:
 	
 	void SetWeaponState(EWeaponState State);
 
-	void Attack();
+	UFUNCTION(Server, Reliable)
+	void ServerAttack();
 
 protected:
 	virtual void BeginPlay() override;

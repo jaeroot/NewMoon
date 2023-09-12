@@ -5,12 +5,17 @@
 
 #include "KismetAnimationLibrary.h"
 #include "AI/NMMountainDragon.h"
+#include "Components/CombatComponent.h"
 
 void UNMMountainDragonAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	NMMountainDragon = Cast<ANMMountainDragon>(TryGetPawnOwner());
+
+	CheckFireSpread = false;
+	CheckFireBall = false;
+	bIsDead = false;
 }
 
 void UNMMountainDragonAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -31,6 +36,39 @@ void UNMMountainDragonAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	bIsBattleState = NMMountainDragon->bIsBattleState;
 	
 	bGlideAttack = NMMountainDragon->bGlideAttack;
-	bFireBallAttack = NMMountainDragon->bFireBallAttack;
-	bFireSpreadAttack = NMMountainDragon->bFireSpreadAttack;
+	bFly = NMMountainDragon->bFly;
+
+	if (!CheckFireSpread)
+	{
+		bFireSpreadAttack = NMMountainDragon->bFireSpreadAttack;
+
+		if (bFireSpreadAttack)
+			CheckFireSpread = true;
+	}
+	else
+	{
+		bFireSpreadAttack = false;
+	}
+
+	if (!CheckFireBall)
+	{
+		bFireBallAttack = NMMountainDragon->bFireBallAttack;
+		
+		if (bFireBallAttack)
+			CheckFireBall = true;
+	}
+	else
+	{
+		bFireBallAttack = false;
+	}
+	
+	if (NMMountainDragon->Combat->GetHP() <= 0)
+	{
+		bIsDead = true;
+	}
+}
+
+void UNMMountainDragonAnimInstance::AnimNotify_Attack()
+{
+	OnAttack.Broadcast();
 }

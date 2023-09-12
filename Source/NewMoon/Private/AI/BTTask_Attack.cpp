@@ -21,7 +21,8 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
-	Character->Attack();
+	int rand = FMath::RandRange(1, 4);
+	Character->MulticastAttack(rand);
 
 	return EBTNodeResult::Succeeded;
 }

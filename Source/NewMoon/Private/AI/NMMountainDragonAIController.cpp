@@ -12,6 +12,10 @@ const FName ANMMountainDragonAIController::CanGlideAttackKey(TEXT("CanGlideAttac
 const FName ANMMountainDragonAIController::CanFireBallAttackKey(TEXT("CanFireBallAttack"));
 const FName ANMMountainDragonAIController::CanFireSpreadAttackKey(TEXT("CanFireSpreadAttack"));
 const FName ANMMountainDragonAIController::TargetKey(TEXT("Target"));
+const FName ANMMountainDragonAIController::BaseLocationKey(TEXT("BaseLocation"));
+const FName ANMMountainDragonAIController::FireLocationKey(TEXT("FireLocation"));
+const FName ANMMountainDragonAIController::FireTargetKey(TEXT("FireTarget"));
+const FName ANMMountainDragonAIController::GlideTargetKey(TEXT("GlideTarget"));
 
 ANMMountainDragonAIController::ANMMountainDragonAIController()
 {

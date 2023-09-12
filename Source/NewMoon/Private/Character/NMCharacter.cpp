@@ -4,7 +4,10 @@
 #include "Character/NMCharacter.h"
 
 #include "Character/NMCharacterMovementComponent.h"
+#include "Components/CombatComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Weapon/Weapon.h"
 
 ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UNMCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -59,14 +62,15 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	SpringArm->TargetArmLength = 300.0f;
 	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 30.0f));
 	SpringArm->bUsePawnControlRotation = true;
+	// SpringArm->TargetOffset = FVector(0.0f, 75.0f, 75.0f);
 
 	// Set Camera
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
-	Camera->SetRelativeLocation(FVector(0.0f, 0.0f, 10.0f));
+	Camera->SetRelativeLocation(FVector(0.0f, 75.0f, 75.0f));
 	Camera->bUsePawnControlRotation = false;
 
-	// Set Animation
+	// Set Animation	
 	static ConstructorHelpers::FClassFinder<UAnimInstance> Mannequin_Anim(TEXT("/Game/Blueprints/Character/Animations/ABP_NMCharacter.ABP_NMCharacter_C"));
 	if (Mannequin_Anim.Succeeded())
 	{
@@ -100,6 +104,20 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 		ProneTimeline->SetTimelineFinishedFunc(ProneTimelineFinish);
 	}
 	ProneTimeline->SetLooping(false);
+	
+	// Set Combat
+	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
+	Combat->SetIsReplicated(true);
+	Combat->NMCharacter = this;
+	Combat->SetMaxHP(100.0f);
+
+	// Set UI WIdget
+	// static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD_C(TEXT("/Game/Blueprints/UI/WB_Main.WB_Main_C"));
+	// if (UI_HUD_C.Succeeded())
+	// {
+	// 	HPBarWidgetClass = UI_HUD_C.Class;
+	// }
+	
 }
 
 void ANMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -112,7 +130,9 @@ void ANMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 void ANMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// HPBarWidget = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), HPBarWidgetClass);
+	// HPBarWidget->AddToViewport();
 }
 
 void ANMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -140,7 +160,6 @@ void ANMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void ANMCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 }
 
 void ANMCharacter::MoveForward(float Value)
@@ -262,16 +281,33 @@ void ANMCharacter::AimButtonReleased()
 
 void ANMCharacter::AttackButtonPressed()
 {
+	if (Combat && Combat->EquippedWeapon)
+	{
+		Combat->EquippedWeapon->ServerAttack();
+	}
 }
 
 void ANMCharacter::InteractButtonPressed()
 {
-	
+	if (Combat)
+	{
+		if (HasAuthority())
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
+		else
+		{
+			ServerInteractButtonPressed();
+		}
+	}
 }
 
 void ANMCharacter::ServerInteractButtonPressed_Implementation()
 {
-	
+	if (Combat)
+	{
+		Combat->EquipWeapon(OverlappingWeapon);
+	}
 }
 
 void ANMCharacter::ControlRotationButtonPressed()
@@ -288,6 +324,11 @@ void ANMCharacter::ControlRotationButtonReleased()
 {
 	ControlRotationBlocked = false;
 	CameraRotTimeline->PlayFromStart();
+}
+
+float ANMCharacter::GetHPPercentage()
+{
+	return (Combat->GetHP() / Combat->GetMaxHP());
 }
 
 void ANMCharacter::CameraRotInterp(float Value)
@@ -389,16 +430,14 @@ bool ANMCharacter::CheckCanStand(float HalfHeight)
 	return bResult;
 }
 
+bool ANMCharacter::IsWeaponEquipped()
+{
+	if (Combat && Combat->EquippedWeapon)
+		return true;
+	
+	return false;
+}
 
-// 해야할것
-// ALT키 카메라 전환
-// 달리기
-// UI붙여서 앉기 눕기 중복 안되는거 표시하기
-// 무기 시스템 (투사체, 히트스캔, 칼, 맨손)
-// 체력 시스템
-// AI 시스템 (기본, 보스)
-// 탈것 시스템(자동차)
-// 인벤토리 시스템
 
 void ANMCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {

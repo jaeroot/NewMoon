@@ -3,8 +3,11 @@
 
 #include "Weapon/Weapon.h"
 
+#include "AI/NMMountainDragon.h"
 #include "Character/NMCharacter.h"
+#include "Components/CombatComponent.h"
 #include "Components/SphereComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Net/UnrealNetwork.h"
 
 AWeapon::AWeapon()
@@ -74,13 +77,53 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State;
+
+	switch (WeaponState)
+	{
+	case EWeaponState::EWS_Equipped:
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
+}
+
+void AWeapon::ServerAttack_Implementation()
+{
+	const USkeletalMeshSocket* MuzzleFlashSocket = WeaponMesh->GetSocketByName(FName("MuzzleFlash"));
+	if (MuzzleFlashSocket)
+	{
+		FHitResult HitResult;
+		FVector StartTrace = MuzzleFlashSocket->GetSocketLocation(WeaponMesh);
+		FVector EndTrace = (Cast<ANMCharacter>(GetOwner())->Camera->GetForwardVector() * 3000.0f) + Cast<ANMCharacter>(GetOwner())->Camera->GetComponentLocation();
+		bool bResult = GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			StartTrace,
+			EndTrace,
+			ECC_Camera
+		);
+
+		if (bResult)
+		{
+			if (HitResult.GetActor()->IsA(ANMMountainDragon::StaticClass()))
+			{
+				Cast<ANMMountainDragon>(HitResult.GetActor())->Combat->TakeDamage(50.0f);
+			}
+		}
+		
+#if ENABLE_DRAW_DEBUG
+		DrawDebugLine(
+			GetWorld(),
+			StartTrace,
+			EndTrace,
+			bResult ? FColor::Green : FColor::Red,
+			false,
+			5.0f
+		);
+#endif
+	}
+
 }
 
 void AWeapon::OnRep_WeaponState()
 {
 	
-}
-
-void AWeapon::Attack()
-{
 }

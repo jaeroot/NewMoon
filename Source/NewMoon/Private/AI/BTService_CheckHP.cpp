@@ -4,9 +4,11 @@
 #include "AI/BTService_CheckHP.h"
 
 #include "AIController.h"
+#include "EngineUtils.h"
 #include "AI/NMMountainDragon.h"
 #include "AI/NMMountainDragonAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/TargetPoint.h"
 
 UBTService_CheckHP::UBTService_CheckHP()
 {
@@ -38,6 +40,23 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 			BattleStarted = true;
 			Character->bIsBattleState = true;
 			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::IsBattleStateKey, true);
+
+			OwnerComp.GetBlackboardComponent()->SetValueAsVector(ANMMountainDragonAIController::BaseLocationKey, FVector(-15000.0f, -3000.0f, 4000.0f));
+			OwnerComp.GetBlackboardComponent()->SetValueAsVector(ANMMountainDragonAIController::FireLocationKey, FVector(-15000.0f, 0.0f, 6000.0f));
+
+			for (TActorIterator<ATargetPoint> It(GetWorld()); It; ++It)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *It->GetName());
+				if (*It->GetName() == FString("TargetPoint_1"))
+				{
+					OwnerComp.GetBlackboardComponent()->SetValueAsObject(ANMMountainDragonAIController::FireTargetKey, *It);
+				}
+				
+				if (*It->GetName() == FString("TargetPoint_0"))
+				{
+					OwnerComp.GetBlackboardComponent()->SetValueAsObject(ANMMountainDragonAIController::GlideTargetKey, *It);
+				}
+			}
 		}
 	}
 
@@ -46,7 +65,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		if (HPPercentage < 80)
 		{
 			FireSpreadAttacked = true;
-			Character->bFireSpreadAttack = true;
 			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanFireSpreadAttackKey, true);
 		}
 	}
@@ -56,7 +74,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		if (HPPercentage < 50)
 		{
 			GlideAttacked = true;
-			Character->bGlideAttack = true;
 			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanGlideAttackKey, true);
 		}
 	}
@@ -66,7 +83,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		if (HPPercentage < 30)
 		{
 			FireBallAttacked = true;
-			Character->bFireBallAttack = true;
 			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanFireBallAttackKey, true);
 		}
 	}

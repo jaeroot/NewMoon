@@ -41,4 +41,7 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	ECharacterMotion CurrentCharacterMotion;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
+	bool bWeaponEquipped;
 };

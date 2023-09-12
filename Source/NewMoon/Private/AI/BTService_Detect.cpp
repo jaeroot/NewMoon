@@ -46,7 +46,7 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	);
 
 	if (bResult)
-	{
+	{		
 		for (auto const& OverlapResult : OverlapResults)
 		{
 			auto NMCharacter = Cast<ANMCharacter>(OverlapResult.GetActor());

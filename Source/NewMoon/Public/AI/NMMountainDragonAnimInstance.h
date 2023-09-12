@@ -8,6 +8,8 @@
 
 class ANMMountainDragon;
 
+DECLARE_MULTICAST_DELEGATE(FAttackDelegate);
+
 UCLASS()
 class NEWMOON_API UNMMountainDragonAnimInstance : public UAnimInstance
 {
@@ -16,6 +18,12 @@ class NEWMOON_API UNMMountainDragonAnimInstance : public UAnimInstance
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	FAttackDelegate OnAttack;
+
+private:
+	UFUNCTION()
+	void AnimNotify_Attack();
 	
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
@@ -37,8 +45,20 @@ private:
 	bool bGlideAttack;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true"))
+	bool bFly;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true"))
 	bool bFireBallAttack;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true"))
 	bool bFireSpreadAttack;
+
+	UPROPERTY(BlueprintReadOnly, Category = Attack, meta = (AllowPrivateAccess = "true"))
+	bool bIsDead;
+
+	bool CheckFireSpread;
+	bool CheckFireBall;
+	
+
+	
 };
