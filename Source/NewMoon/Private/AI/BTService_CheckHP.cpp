@@ -18,6 +18,7 @@ UBTService_CheckHP::UBTService_CheckHP()
 	GlideAttacked = false;
 	FireBallAttacked = false;
 	FireSpreadAttacked = false;
+	bCreateNodeInstance = true;
 }
 
 void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -32,6 +33,8 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	int HPPercentage = Character->GetHPPercentage();
 	OwnerComp.GetBlackboardComponent()->SetValueAsInt(ANMMountainDragonAIController::HPPercentageKey, HPPercentage);
+
+	NMLOG(Warning, TEXT("%d"), Character->bIsBattleState);
 	
 	if (!BattleStarted)
 	{

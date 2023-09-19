@@ -21,17 +21,9 @@ struct FTileStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Y;
 
-	FTileStruct()
-		: Actor(nullptr), X(0), Y(0)
-	{
-		
-	}
+	FTileStruct() : Actor(nullptr), X(0), Y(0) {	}
 
-	FTileStruct(AActor* NewActor, float NewX, float NewY)
-		: Actor(NewActor), X(NewX), Y(NewY)
-	{
-		
-	}
+	FTileStruct(AActor* NewActor, float NewX, float NewY) : Actor(NewActor), X(NewX), Y(NewY) {	}
 };
 
 USTRUCT(BlueprintType)

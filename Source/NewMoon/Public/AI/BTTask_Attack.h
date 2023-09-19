@@ -6,6 +6,11 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_Attack.generated.h"
 
+
+struct FAttackTaskMemory
+{
+	int att = 0;
+};
 /**
  * 
  */
@@ -18,6 +23,8 @@ public:
 	UBTTask_Attack();
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
+	int att;
 
 protected:
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
