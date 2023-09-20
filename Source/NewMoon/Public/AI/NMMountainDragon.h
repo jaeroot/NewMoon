@@ -64,6 +64,8 @@ struct FHammerStruct
 	FHammerStruct(AActor* NewActor, int index) : Actor(NewActor), Dir(index) { }
 };
 
+DECLARE_MULTICAST_DELEGATE(FTakeOffEndDelegate);
+
 UCLASS()
 class NEWMOON_API ANMMountainDragon : public ACharacter
 {
@@ -72,7 +74,6 @@ class NEWMOON_API ANMMountainDragon : public ACharacter
 public:
 	ANMMountainDragon();
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable)
@@ -85,10 +86,11 @@ public:
 	void ServerDamage();
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void StartFly();
-	
-	UFUNCTION(NetMulticast, Reliable)
 	void EndFly();
+
+	UFUNCTION(Server, Reliable)
+	void ServerTakeOff();
+	FTakeOffEndDelegate TakeOffEnd;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void StartGlide();
@@ -113,8 +115,8 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 private:
-	FOnTimelineFloat FlyTimelineFunction;
-	FOnTimelineEvent FlyTimelineFinish;
+	FOnTimelineFloat TakeOffTimelineFunction;
+	FOnTimelineEvent TakeOffTimelineFinish;
 	
 	FOnTimelineFloat LandTimelineFunction;
 	FOnTimelineEvent LandTimelineFinish;
@@ -124,11 +126,11 @@ private:
 	
 	FOnTimelineFloat TileTimelineFunction;
 	FOnTimelineEvent TileTimelineFinish;
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void FlyInterp(float Value);
-	UFUNCTION(NetMulticast, Reliable)
-	void FlyFinish();
+
+	UFUNCTION(Server, Reliable)
+	void ServerTakeOffInterp(float Value);
+	UFUNCTION(Server, Reliable)
+	void ServerTakeOffFinish();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void LandInterp(float Value);
@@ -165,7 +167,7 @@ public:
 	FVector FlyLocation;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UTimelineComponent* FlyTimeline;
+	UTimelineComponent* TakeOffTimeline;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UTimelineComponent* LandTimeline;
@@ -181,7 +183,7 @@ private:
 	class UAnimMontage* AttackMontage;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UCurveFloat* FlyCurve;
+	UCurveFloat* TakeOffCurve;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UCurveFloat* LandCurve;

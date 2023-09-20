@@ -11,7 +11,7 @@
 
 UBTTask_Fly::UBTTask_Fly()
 {
-	NodeName = TEXT("StartFly");
+	NodeName = TEXT("StartFlyOld");
 }
 
 EBTNodeResult::Type UBTTask_Fly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTTask_Fly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		return EBTNodeResult::Failed;
 	}
 
-	Character->StartFly();
+	// Character->StartFly();
 
 	return EBTNodeResult::Succeeded;
 }

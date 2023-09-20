@@ -67,19 +67,19 @@ ANMMountainDragon::ANMMountainDragon()
 	BaseLocation = FVector(-15000.0f, -3000.0f, 4300.0f);
 	FlyLocation = FVector(-15000.0f, -1000.0f, 5300.0f);
 
-	// Set FlyTimeline
-	FlyTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("FlyTimeline"));
-	FlyTimelineFunction.BindUFunction(this, FName("FlyInterp"));
-	FlyTimelineFinish.BindUFunction(this, FName("FlyFinish"));
+	// Set TakeOffTimeline
+	TakeOffTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("TakeOffTimeline"));
+	TakeOffTimelineFunction.BindUFunction(this, FName("ServerTakeOffInterp"));
+	TakeOffTimelineFinish.BindUFunction(this, FName("ServerTakeOffFinish"));
 
-	static ConstructorHelpers::FObjectFinder<UCurveFloat> Fly_Curve(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/FlyCurve.FlyCurve"));
-	if (Fly_Curve.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> TakeOff_Curve(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/FlyCurve.FlyCurve"));
+	if (TakeOff_Curve.Succeeded())
 	{
-		FlyCurve = Fly_Curve.Object;
-		FlyTimeline->AddInterpFloat(FlyCurve, FlyTimelineFunction);
-		FlyTimeline->SetTimelineFinishedFunc(FlyTimelineFinish);
+		TakeOffCurve = TakeOff_Curve.Object;
+		TakeOffTimeline->AddInterpFloat(TakeOffCurve, TakeOffTimelineFunction);
+		TakeOffTimeline->SetTimelineFinishedFunc(TakeOffTimelineFinish);
 	}
-	FlyTimeline->SetLooping(false);
+	TakeOffTimeline->SetLooping(false);
 
 	// Set LandTimeline
 	LandTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("LandTimeline"));
@@ -184,12 +184,6 @@ void ANMMountainDragon::Tick(float DeltaTime)
 	}
 }
 
-void ANMMountainDragon::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 int ANMMountainDragon::GetHPPercentage()
 {
 	return (Combat->GetHP() / Combat->GetMaxHP()) * 100;
@@ -232,13 +226,39 @@ void ANMMountainDragon::MulticastAttack_Implementation(int Rand)
 	}
 }
 
-void ANMMountainDragon::StartFly_Implementation()
+void ANMMountainDragon::ServerTakeOff_Implementation()
 {
 	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	bFly = true;
-
 	OldLocation = GetActorLocation();
-	FlyTimeline->PlayFromStart();
+	
+	TakeOffTimeline->PlayFromStart();
+}
+
+void ANMMountainDragon::ServerTakeOffInterp_Implementation(float Value)
+{
+	const FVector NewLocation = FMath::Lerp(OldLocation, FlyLocation, Value);
+	SetActorLocation(NewLocation);
+}
+
+void ANMMountainDragon::ServerTakeOffFinish_Implementation()
+{
+	TakeOffEnd.Broadcast();
+	
+	// if (HasAuthority())
+	// {
+	// 	TakeOffEnd.Broadcast();
+	// 	if (bFly)
+	// 	{
+	// 		if (!FlyFireAttack)
+	// 			FireSpreadAttack();
+	// 		else
+	// 			FireBallAttack();
+	// 	}
+	// 	else if (bGlideAttack)
+	// 	{
+	// 		GetCharacterMovement()->MaxFlySpeed = 1800.0f;
+	// 	}
+	// }
 }
 
 void ANMMountainDragon::EndFly_Implementation()
@@ -296,7 +316,7 @@ void ANMMountainDragon::StartGlide_Implementation()
 	bGlideAttack = true;
 	
 	OldLocation = GetActorLocation();
-	FlyTimeline->PlayFromStart();
+	TakeOffTimeline->PlayFromStart();
 }
 
 void ANMMountainDragon::GlideAttack_Implementation()
@@ -441,33 +461,6 @@ void ANMMountainDragon::FireBallAttack_Implementation()
 void ANMMountainDragon::AddHammer_Implementation(AActor* Actor, int input)
 {
 	// Hammer.Add(FHammerStruct(Actor, input));
-}
-
-void ANMMountainDragon::FlyInterp_Implementation(float Value)
-{
-	FVector NewLocation;
-	NewLocation.X = FMath::Lerp(OldLocation.X, FlyLocation.X, Value);
-	NewLocation.Y = FMath::Lerp(OldLocation.Y, FlyLocation.Y, Value);
-	NewLocation.Z = FMath::Lerp(OldLocation.Z, FlyLocation.Z, Value);
-	SetActorLocation(NewLocation);
-}
-
-void ANMMountainDragon::FlyFinish_Implementation()
-{
-	if (HasAuthority())
-	{
-		if (bFly)
-		{
-			if (!FlyFireAttack)
-				FireSpreadAttack();
-			else
-				FireBallAttack();
-		}
-		else if (bGlideAttack)
-		{
-			GetCharacterMovement()->MaxFlySpeed = 1800.0f;
-		}
-	}
 }
 
 void ANMMountainDragon::LandInterp_Implementation(float Value)
