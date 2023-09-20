@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "NewMoon.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_StartFly.generated.h"
 

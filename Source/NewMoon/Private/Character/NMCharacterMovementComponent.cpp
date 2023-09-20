@@ -3,7 +3,7 @@
 
 #include "Character/NMCharacterMovementComponent.h"
 
-#include "AI/Tile.h"
+#include "AI/MountainDragon/Gimmick/Tile.h"
 #include "Character/NMCharacter.h"
 #include "Net/UnrealNetwork.h"
 

@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/BTTask_StartFly.h"
+#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_StartFly.h"
 
 #include "AIController.h"
-#include "AI/NMMountainDragon.h"
+#include "AI/MountainDragon/NMMountainDragon.h"
 
 UBTTask_StartFly::UBTTask_StartFly(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

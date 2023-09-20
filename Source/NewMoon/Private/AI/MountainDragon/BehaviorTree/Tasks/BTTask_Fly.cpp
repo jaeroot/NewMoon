@@ -1,13 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/BTTask_Fly.h"
+#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_Fly.h"
 
 #include "AIController.h"
-#include "AI/NMMountainDragon.h"
-#include "AI/NMMountainDragonAIController.h"
+#include "AI/MountainDragon/NMMountainDragon.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 UBTTask_Fly::UBTTask_Fly()
 {

@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/NMMountainDragonAnimInstance.h"
+#include "AI/MountainDragon/NMMountainDragonAnimInstance.h"
 
 #include "KismetAnimationLibrary.h"
-#include "AI/NMMountainDragon.h"
+#include "AI/MountainDragon/NMMountainDragon.h"
 #include "Components/CombatComponent.h"
 
 void UNMMountainDragonAnimInstance::NativeInitializeAnimation()

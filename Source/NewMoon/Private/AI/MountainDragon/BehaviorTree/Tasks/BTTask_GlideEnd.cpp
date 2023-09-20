@@ -1,17 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/BTTask_GlideAttack.h"
+#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_GlideEnd.h"
 
 #include "AIController.h"
-#include "AI/NMMountainDragon.h"
+#include "AI/MountainDragon/NMMountainDragon.h"
 
-UBTTask_GlideAttack::UBTTask_GlideAttack()
+UBTTask_GlideEnd::UBTTask_GlideEnd()
 {
-	NodeName = TEXT("GlideAttack");
+	NodeName = TEXT("EndGlide");
 }
 
-EBTNodeResult::Type UBTTask_GlideAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_GlideEnd::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTask_GlideAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		return EBTNodeResult::Failed;
 	}
 
-	Character->GlideAttack();
+	Character->EndGlide();
 	
 	return EBTNodeResult::Succeeded;
 }

@@ -3,7 +3,7 @@
 
 #include "Weapon/Weapon.h"
 
-#include "AI/NMMountainDragon.h"
+#include "AI/MountainDragon/NMMountainDragon.h"
 #include "Character/NMCharacter.h"
 #include "Components/CombatComponent.h"
 #include "Components/SphereComponent.h"
