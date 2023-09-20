@@ -20,6 +20,7 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	ProneHalfHeight = 45.0f;
 	Radius = 45.0f;
 	GetCapsuleComponent()->InitCapsuleSize(Radius, StandHalfHeight);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("NMCharacter"));
 	
 	// Set Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_Mannequin(TEXT("/Game/Assets/Characters/UE4_Mannequin/Mesh/SK_Mannequin.SK_Mannequin"));
@@ -397,7 +398,7 @@ bool ANMCharacter::CheckCanStand(float HalfHeight)
 		StartTrace,
 		EndTrace,
 		FQuat::Identity,
-		ECollisionChannel::ECC_Visibility,
+		ECC_Visibility,
 		FCollisionShape::MakeSphere(Radius));
 
 

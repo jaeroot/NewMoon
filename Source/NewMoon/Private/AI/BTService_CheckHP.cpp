@@ -33,8 +33,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	int HPPercentage = Character->GetHPPercentage();
 	OwnerComp.GetBlackboardComponent()->SetValueAsInt(ANMMountainDragonAIController::HPPercentageKey, HPPercentage);
-
-	NMLOG(Warning, TEXT("%d"), Character->bIsBattleState);
 	
 	if (!BattleStarted)
 	{
@@ -49,7 +47,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 			for (TActorIterator<ATargetPoint> It(GetWorld()); It; ++It)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *It->GetName());
 				if (*It->GetName() == FString("TargetPoint_1"))
 				{
 					OwnerComp.GetBlackboardComponent()->SetValueAsObject(ANMMountainDragonAIController::FireTargetKey, *It);

@@ -24,6 +24,7 @@ ANMMountainDragon::ANMMountainDragon()
 
 	// Set Collision Capsule
 	GetCapsuleComponent()->InitCapsuleSize(300, 300);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("NMEnemy"));
 	
 	// Set Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_MountainDragon(TEXT("/Game/Assets/MountainDragon/Meshes/SK_MOUNTAIN_DRAGON.SK_MOUNTAIN_DRAGON"));
@@ -32,7 +33,6 @@ ANMMountainDragon::ANMMountainDragon()
 		GetMesh()->SetSkeletalMesh(SK_MountainDragon.Object);
 	}
 	GetMesh()->SetRelativeLocationAndRotation(FVector(-80.0f, 0.0f, -300.0f), FRotator(0.0f, -90.0f, 0.0f));
-	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Overlap);
 
 	// Set Animation
 	static ConstructorHelpers::FClassFinder<UAnimInstance> MountainDragon_Anim(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/ABP_MountainDragon.ABP_MountainDragon_C"));
@@ -257,7 +257,7 @@ void ANMMountainDragon::EndFly_Implementation()
 				OverlapResults,
 				Center,
 				FQuat::Identity,
-				ECC_Camera,
+				ECC_EnemyAttack,
 				FCollisionShape::MakeSphere(Radius)
 			);
 
@@ -325,18 +325,20 @@ void ANMMountainDragon::EndGlide_Implementation()
 	if (World && HasAuthority())
 	{
 		TArray<FOverlapResult> OverlapResults;
+		FCollisionQueryParams Params(NAME_None, false, this);
 		bool bResult = World->OverlapMultiByChannel(
 			OverlapResults,
 			Center,
 			FQuat::Identity,
-			ECC_Camera,
-			FCollisionShape::MakeBox(Size)
+			ECC_EnemyAttack,
+			FCollisionShape::MakeBox(Size),
+			Params
 		);
 
 		if (bResult)
 		{
 			for (auto OverlapResult : OverlapResults)
-			{				
+			{
 				ANMCharacter* NMCharacter = Cast<ANMCharacter>(OverlapResult.GetActor());
 				if (NMCharacter)
 				{

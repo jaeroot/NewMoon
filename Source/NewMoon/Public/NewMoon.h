@@ -24,8 +24,15 @@ enum class ECharacterState : uint8
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
+
 DECLARE_LOG_CATEGORY_EXTERN(NewMoon, Log, All);
 #define NMLOG_CALLINFO (FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))
 #define NMLOG_S(Verbosity) UE_LOG(NewMoon, Verbosity, TEXT("%s"), *NMLOG_CALLINFO)
 #define NMLOG(Verbosity, Format, ...) UE_LOG(NewMoon, Verbosity, TEXT("%s %s"), *NMLOG_CALLINFO, *FString::Printf(Format, ##__VA_ARGS__))
 #define NMCHECK(Expr, ...) {if(!(Expr)) {NMLOG(Error, TEXT("ASSERTION : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__;}}
+
+
+#define ECC_NMEnemy ECC_GameTraceChannel4
+#define ECC_EnemyAttack ECC_GameTraceChannel2
+#define ECC_NMCharacter ECC_GameTraceChannel1
+#define ECC_PlayerAttack ECC_GameTraceChannel3

@@ -9,8 +9,8 @@
 UBTTask_Attack::UBTTask_Attack()
 {
 	bNotifyTick = true;
-	att = 0;
-	bCreateNodeInstance = true;
+	// att = 0;
+	// bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -26,15 +26,20 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	int rand = FMath::RandRange(1, 4);
 	Character->MulticastAttack(rand);
 	
-	// FAttackTaskMemory* MyMemory = reinterpret_cast<FAttackTaskMemory*>(NodeMemory);
-	// MyMemory->att++;
-	//
-	// NMLOG(Warning, TEXT("att: %d"), MyMemory->att);
+	FAttackTaskMemory* MyMemory = CastInstanceNodeMemory<FAttackTaskMemory>(NodeMemory);
+	MyMemory->att++;
+	
+	NMLOG(Warning, TEXT("att: %d"), MyMemory->att);
 
-	att++;
-	NMLOG(Warning, TEXT("Att: %d"), att);
+	// att++;
+	// NMLOG(Warning, TEXT("Att: %d"), att);
 
 	return EBTNodeResult::Succeeded;
+}
+
+uint16 UBTTask_Attack::GetInstanceMemorySize() const
+{
+	return sizeof(FAttackTaskMemory);
 }
 
 void UBTTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
