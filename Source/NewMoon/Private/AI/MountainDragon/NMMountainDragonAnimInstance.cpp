@@ -35,32 +35,32 @@ void UNMMountainDragonAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	bIsBattleState = NMMountainDragon->bIsBattleState;
 	
-	bGlideAttack = NMMountainDragon->bGlideAttack;
+	bGlideAttack = NMMountainDragon->bGlide;
 	bFly = NMMountainDragon->bFly;
 
-	if (!CheckFireSpread)
-	{
-		bFireSpreadAttack = NMMountainDragon->bFireSpreadAttack;
-
-		if (bFireSpreadAttack)
-			CheckFireSpread = true;
-	}
-	else
-	{
-		bFireSpreadAttack = false;
-	}
-
-	if (!CheckFireBall)
-	{
-		bFireBallAttack = NMMountainDragon->bFireBallAttack;
-		
-		if (bFireBallAttack)
-			CheckFireBall = true;
-	}
-	else
-	{
-		bFireBallAttack = false;
-	}
+	// if (!CheckFireSpread)
+	// {
+	// 	bFireSpreadAttack = NMMountainDragon->bFireSpreadAttack;
+	//
+	// 	if (bFireSpreadAttack)
+	// 		CheckFireSpread = true;
+	// }
+	// else
+	// {
+	// 	bFireSpreadAttack = false;
+	// }
+	//
+	// if (!CheckFireBall)
+	// {
+	// 	bFireBallAttack = NMMountainDragon->bFireBallAttack;
+	// 	
+	// 	if (bFireBallAttack)
+	// 		CheckFireBall = true;
+	// }
+	// else
+	// {
+	// 	bFireBallAttack = false;
+	// }
 	
 	if (NMMountainDragon->Combat->GetHP() <= 0)
 	{

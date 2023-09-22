@@ -1,18 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_Fly.h"
+#include "AI/BehaviorTree/Tasks/BTTask_GlideAttack.h"
 
 #include "AIController.h"
 #include "AI/MountainDragon/NMMountainDragon.h"
-#include "BehaviorTree/BlackboardComponent.h"
 
-UBTTask_Fly::UBTTask_Fly()
+UBTTask_GlideAttack::UBTTask_GlideAttack()
 {
-	NodeName = TEXT("StartFlyOld");
+	NodeName = TEXT("GlideAttack");
 }
 
-EBTNodeResult::Type UBTTask_Fly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_GlideAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
@@ -22,7 +21,7 @@ EBTNodeResult::Type UBTTask_Fly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		return EBTNodeResult::Failed;
 	}
 
-	// Character->StartFly();
-
+	Character->GlideAttack();
+	
 	return EBTNodeResult::Succeeded;
 }

@@ -7,64 +7,8 @@
 #include "GameFramework/Character.h"
 #include "NMMountainDragon.generated.h"
 
-USTRUCT(BlueprintType)
-struct FTileStruct
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* Actor;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float X;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Y;
-
-	FTileStruct() : Actor(nullptr), X(0), Y(0) {	}
-
-	FTileStruct(AActor* NewActor, float NewX, float NewY) : Actor(NewActor), X(NewX), Y(NewY) {	}
-};
-
-USTRUCT(BlueprintType)
-struct F2DTArray
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FTileStruct> Array;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Dir;
-	
-	FTileStruct operator[] (int32 ArrayNum)
-	{
-		return Array[ArrayNum];
-	}
-
-	void Add(FTileStruct NewStruct)
-	{
-		Array.Add(NewStruct);
-	}
-};
-
-USTRUCT(BlueprintType)
-struct FHammerStruct
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AActor* Actor;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Dir;
-
-	FHammerStruct() : Actor(nullptr), Dir(0) { }
-
-	FHammerStruct(AActor* NewActor, int index) : Actor(NewActor), Dir(index) { }
-};
-
 DECLARE_MULTICAST_DELEGATE(FTakeOffEndDelegate);
+DECLARE_MULTICAST_DELEGATE(FLandEndDelegate);
 
 UCLASS()
 class NEWMOON_API ANMMountainDragon : public ACharacter
@@ -90,7 +34,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerTakeOff();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerLand();
 	FTakeOffEndDelegate TakeOffEnd;
+	FLandEndDelegate LandEnd;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void StartGlide();
@@ -106,9 +54,13 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void FireBallAttack();
+
+	void SetFly(bool NewFly) { bFly = NewFly; }
+	void SetGlide(bool NewGlide) { bGlide = NewGlide; }
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void AddHammer(AActor* Actor, int input);
+	//
+	// UFUNCTION(NetMulticast, Reliable)
+	// void AddHammer(AActor* Actor, int input);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -132,20 +84,20 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerTakeOffFinish();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void LandInterp(float Value);
-	UFUNCTION(NetMulticast, Reliable)
-	void LandFinish();
+	UFUNCTION(Server, Reliable)
+	void ServerLandInterp(float Value);
+	UFUNCTION(Server, Reliable)
+	void ServerLandFinish();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void HammerInterp(float Value);
-	UFUNCTION(NetMulticast, Reliable)
-	void HammerFinish();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void TileInterp(float Value);
-	UFUNCTION(NetMulticast, Reliable)
-	void TileFinish();
+	// UFUNCTION(NetMulticast, Reliable)
+	// void HammerInterp(float Value);
+	// UFUNCTION(NetMulticast, Reliable)
+	// void HammerFinish();
+	//
+	// UFUNCTION(NetMulticast, Reliable)
+	// void TileInterp(float Value);
+	// UFUNCTION(NetMulticast, Reliable)
+	// void TileFinish();
 
 public:	
 	UPROPERTY(VisibleAnywhere)
@@ -155,13 +107,13 @@ public:
 	bool bIsBattleState;
 	
 	UPROPERTY(Replicated)
-	bool bGlideAttack;
+	bool bGlide;
 	UPROPERTY(Replicated)
 	bool bFly;
-	UPROPERTY(Replicated)
-	bool bFireBallAttack;
-	UPROPERTY(Replicated)
-	bool bFireSpreadAttack;
+	// UPROPERTY(Replicated)
+	// bool bFireBallAttack;
+	// UPROPERTY(Replicated)
+	// bool bFireSpreadAttack;
 
 	FVector BaseLocation;
 	FVector FlyLocation;
@@ -196,9 +148,6 @@ private:
 
 	FVector OldLocation;
 
-	UPROPERTY(Replicated, VisibleAnywhere)
-	TArray<F2DTArray> MapTile;
-
 	// UPROPERTY(Replicated, VisibleAnywhere)
 	// TArray<FHammerStruct> Hammer;
 
@@ -212,4 +161,6 @@ private:
 	UMaterial* DecalMaterial2;
 
 	bool FlyFireAttack = false;
+
+	class UMapManageComponent* MapManager;
 };

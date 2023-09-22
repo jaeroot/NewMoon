@@ -1,17 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_EndFly.h"
+#include "AI/BehaviorTree/Tasks/BTTask_GlideEnd.h"
 
 #include "AIController.h"
 #include "AI/MountainDragon/NMMountainDragon.h"
 
-UBTTask_EndFly::UBTTask_EndFly()
+UBTTask_GlideEnd::UBTTask_GlideEnd()
 {
-	NodeName = TEXT("EndFly");
+	NodeName = TEXT("EndGlide");
 }
 
-EBTNodeResult::Type UBTTask_EndFly::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_GlideEnd::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
@@ -21,7 +21,7 @@ EBTNodeResult::Type UBTTask_EndFly::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
-	Character->EndFly();
-
+	Character->EndGlide();
+	
 	return EBTNodeResult::Succeeded;
 }

@@ -4,16 +4,21 @@
 
 #include "NewMoon.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_FireSpreadAttack.generated.h"
+#include "BTTask_GlideStart.generated.h"
 
+struct FBTGlideStartTaskMemory
+{
+	// check TakeOff() Finished
+	bool bIsFinished;
+};
 
 UCLASS()
-class NEWMOON_API UBTTask_FireSpreadAttack : public UBTTaskNode
+class NEWMOON_API UBTTask_GlideStart : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
 public:
-	UBTTask_FireSpreadAttack(const FObjectInitializer& ObjectInitializer);
+	UBTTask_GlideStart(const FObjectInitializer& ObjectInitializer);
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	virtual uint16 GetInstanceMemorySize() const override;
 

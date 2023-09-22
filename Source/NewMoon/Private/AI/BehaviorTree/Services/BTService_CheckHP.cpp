@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/MountainDragon/BehaviorTree/Services/BTService_CheckHP.h"
+#include "AI/BehaviorTree/Services/BTService_CheckHP.h"
 
 #include "AIController.h"
 #include "EngineUtils.h"
@@ -15,9 +15,6 @@ UBTService_CheckHP::UBTService_CheckHP()
 	NodeName = TEXT("CheckHP");
 	Interval = 1.0f;
 	BattleStarted = false;
-	GlideAttacked = false;
-	FireBallAttacked = false;
-	FireSpreadAttacked = false;
 	bCreateNodeInstance = true;
 }
 
@@ -57,33 +54,6 @@ void UBTService_CheckHP::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 					OwnerComp.GetBlackboardComponent()->SetValueAsObject(ANMMountainDragonAIController::GlideTargetKey, *It);
 				}
 			}
-		}
-	}
-
-	if (!FireSpreadAttacked)
-	{
-		if (HPPercentage < 80)
-		{
-			FireSpreadAttacked = true;
-			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanFireSpreadAttackKey, true);
-		}
-	}
-
-	if (!GlideAttacked)
-	{
-		if (HPPercentage < 50)
-		{
-			GlideAttacked = true;
-			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanGlideAttackKey, true);
-		}
-	}
-
-	if (!FireBallAttacked)
-	{
-		if (HPPercentage < 30)
-		{
-			FireBallAttacked = true;
-			OwnerComp.GetBlackboardComponent()->SetValueAsBool(ANMMountainDragonAIController::CanFireBallAttackKey, true);
 		}
 	}
 }

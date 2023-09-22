@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/MountainDragon/BehaviorTree/Decorators/BTDecorator_CanAttack.h"
+#include "AI/BehaviorTree/Decorators/BTDecorator_CanAttack.h"
 
 #include "AIController.h"
 #include "AI/MountainDragon/NMMountainDragon.h"

@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/MountainDragon/BehaviorTree/Tasks/BTTask_Glide.h"
+#include "AI/BehaviorTree/Tasks/BTTask_Glide.h"
 
 #include "AIController.h"
 #include "AI/MountainDragon/NMMountainDragon.h"
 
 UBTTask_Glide::UBTTask_Glide()
 {
-	NodeName = TEXT("StartGlide");
+	NodeName = TEXT("StartGlideOld");
 }
 
 EBTNodeResult::Type UBTTask_Glide::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)

@@ -22,7 +22,4 @@ protected:
 
 private:
 	bool BattleStarted;
-	bool GlideAttacked;
-	bool FireBallAttacked;
-	bool FireSpreadAttacked;
 };

@@ -8,9 +8,9 @@
 
 const FName ANMMountainDragonAIController::IsBattleStateKey(TEXT("IsBattleState"));
 const FName ANMMountainDragonAIController::HPPercentageKey(TEXT("HPPercentage"));
-const FName ANMMountainDragonAIController::CanGlideAttackKey(TEXT("CanGlideAttack"));
-const FName ANMMountainDragonAIController::CanFireBallAttackKey(TEXT("CanFireBallAttack"));
-const FName ANMMountainDragonAIController::CanFireSpreadAttackKey(TEXT("CanFireSpreadAttack"));
+const FName ANMMountainDragonAIController::GlideAttackedKey(TEXT("GlideAttacked"));
+const FName ANMMountainDragonAIController::FireBallAttackedKey(TEXT("FireBallAttacked"));
+const FName ANMMountainDragonAIController::FireSpreadAttackedKey(TEXT("FireSpreadAttacked"));
 const FName ANMMountainDragonAIController::TargetKey(TEXT("Target"));
 const FName ANMMountainDragonAIController::BaseLocationKey(TEXT("BaseLocation"));
 const FName ANMMountainDragonAIController::FireLocationKey(TEXT("FireLocation"));

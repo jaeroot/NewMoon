@@ -22,9 +22,9 @@ public:
 public:
 	static const FName IsBattleStateKey;
 	static const FName HPPercentageKey;
-	static const FName CanGlideAttackKey;
-	static const FName CanFireBallAttackKey;
-	static const FName CanFireSpreadAttackKey;
+	static const FName GlideAttackedKey;
+	static const FName FireBallAttackedKey;
+	static const FName FireSpreadAttackedKey;
 	static const FName TargetKey;
 	static const FName BaseLocationKey;
 	static const FName FireLocationKey;
