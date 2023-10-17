@@ -21,14 +21,25 @@ EBTNodeResult::Type UBTTask_FlyFireSpreadAttack::ExecuteTask(UBehaviorTreeCompon
 		return EBTNodeResult::Failed;
 	}
 
-	// NMMountainDragon->FireSpreadAttack();
+	FBTFlyFireSpreadAttackTaskMemory* MyMemory = CastInstanceNodeMemory<FBTFlyFireSpreadAttackTaskMemory>(NodeMemory);
+	MyMemory->bIsFinished = false;
+	
+	NMMountainDragon->ServerFireSpreadAttack();
+	NMMountainDragon->FireSpreadAttackEnd.AddLambda([this, MyMemory]() -> void
+	{
+		MyMemory->bIsFinished = true;
+	});
 
-	return EBTNodeResult::Succeeded;
+	return EBTNodeResult::InProgress;
 }
 
 void UBTTask_FlyFireSpreadAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	
+	const FBTFlyFireSpreadAttackTaskMemory* MyMemory = CastInstanceNodeMemory<FBTFlyFireSpreadAttackTaskMemory>(NodeMemory);
+	if (MyMemory->bIsFinished)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	}
 }
 
 void UBTTask_FlyFireSpreadAttack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
@@ -39,5 +50,5 @@ void UBTTask_FlyFireSpreadAttack::OnTaskFinished(UBehaviorTreeComponent& OwnerCo
 
 uint16 UBTTask_FlyFireSpreadAttack::GetInstanceMemorySize() const
 {
-	return Super::GetInstanceMemorySize();
+	return sizeof(FBTFlyFireSpreadAttackTaskMemory);
 }

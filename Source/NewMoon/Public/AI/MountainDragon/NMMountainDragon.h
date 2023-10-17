@@ -9,6 +9,9 @@
 
 DECLARE_MULTICAST_DELEGATE(FTakeOffEndDelegate);
 DECLARE_MULTICAST_DELEGATE(FLandEndDelegate);
+DECLARE_MULTICAST_DELEGATE(FFireSpreadAttackFinished);
+DECLARE_MULTICAST_DELEGATE(FFireBallAttackFinished);
+DECLARE_MULTICAST_DELEGATE(FGlideAttackFinished);
 
 UCLASS()
 class NEWMOON_API ANMMountainDragon : public ACharacter
@@ -25,42 +28,39 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastAttack(int Rand);
-	
 	UFUNCTION(Server, Reliable)
 	void ServerDamage();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void EndFly();
 
 	UFUNCTION(Server, Reliable)
 	void ServerTakeOff();
-	
 	UFUNCTION(Server, Reliable)
 	void ServerLand();
+	
 	FTakeOffEndDelegate TakeOffEnd;
 	FLandEndDelegate LandEnd;
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void StartGlide();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void GlideAttack();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void EndGlide();
+	FFireSpreadAttackFinished FireSpreadAttackEnd;
+	FFireBallAttackFinished FireBallAttackEnd;
+	FGlideAttackFinished GlideAttackEnd;
 
+	UFUNCTION(Server, Reliable)
+	void ServerFireSpreadAttack();
 	UFUNCTION(NetMulticast, Reliable)
-	void FireSpreadAttack();
-
+	void MulticastFireSpreadAttack();
+	UFUNCTION(Server, Reliable)
+	void ServerFireSpreadAttackFinished();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerGlideAttack();
 	UFUNCTION(NetMulticast, Reliable)
-	void FireBallAttack();
+	void MulticastGlideAttack();
+	
+	UFUNCTION(Server, Reliable)
+	void ServerFireBallAttack();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFireBallAttack();
 
 	void SetFly(bool NewFly) { bFly = NewFly; }
 	void SetGlide(bool NewGlide) { bGlide = NewGlide; }
-	
-	//
-	// UFUNCTION(NetMulticast, Reliable)
-	// void AddHammer(AActor* Actor, int input);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -88,16 +88,6 @@ private:
 	void ServerLandInterp(float Value);
 	UFUNCTION(Server, Reliable)
 	void ServerLandFinish();
-	
-	// UFUNCTION(NetMulticast, Reliable)
-	// void HammerInterp(float Value);
-	// UFUNCTION(NetMulticast, Reliable)
-	// void HammerFinish();
-	//
-	// UFUNCTION(NetMulticast, Reliable)
-	// void TileInterp(float Value);
-	// UFUNCTION(NetMulticast, Reliable)
-	// void TileFinish();
 
 public:	
 	UPROPERTY(VisibleAnywhere)
@@ -105,62 +95,38 @@ public:
 	
 	UPROPERTY(Replicated)
 	bool bIsBattleState;
-	
 	UPROPERTY(Replicated)
 	bool bGlide;
 	UPROPERTY(Replicated)
 	bool bFly;
-	// UPROPERTY(Replicated)
-	// bool bFireBallAttack;
-	// UPROPERTY(Replicated)
-	// bool bFireSpreadAttack;
-
+	
 	FVector BaseLocation;
 	FVector FlyLocation;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UTimelineComponent* TakeOffTimeline;
-	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UTimelineComponent* LandTimeline;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UTimelineComponent* HammerTimeline;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UTimelineComponent* TileTimeline;
 
 private:
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* AttackMontage;
 	
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* FlyAttackMontage;
+	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UCurveFloat* TakeOffCurve;
-	
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
 	UCurveFloat* LandCurve;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UCurveFloat* HammerCurve;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Timeline")
-	UCurveFloat* TileCurve;
 
 	FVector OldLocation;
-
-	// UPROPERTY(Replicated, VisibleAnywhere)
-	// TArray<FHammerStruct> Hammer;
-
-	// UPROPERTY(Replicated)
-	// TArray<int> HammerDir;
 
 	UPROPERTY(VisibleAnywhere)
 	UMaterial* DecalMaterial;
 	
 	UPROPERTY(VisibleAnywhere)
 	UMaterial* DecalMaterial2;
-
-	bool FlyFireAttack = false;
 
 	class UMapManageComponent* MapManager;
 };

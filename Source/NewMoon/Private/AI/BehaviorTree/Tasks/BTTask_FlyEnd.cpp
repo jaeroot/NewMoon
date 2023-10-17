@@ -54,5 +54,5 @@ void UBTTask_FlyEnd::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* No
 
 uint16 UBTTask_FlyEnd::GetInstanceMemorySize() const
 {
-	return sizeof(FBTFlyEndTaskMemory);;
+	return sizeof(FBTFlyEndTaskMemory);
 }

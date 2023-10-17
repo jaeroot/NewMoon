@@ -4,6 +4,7 @@
 
 #include "NewMoon.h"
 #include "Components/ActorComponent.h"
+#include "Components/TimelineComponent.h"
 #include "MapManageComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -80,11 +81,39 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastTileMoveInterp(float Value);
+	UFUNCTION(Server, Reliable)
+	void ServerTileMoveFinish();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastHammerRotateInterp(FVector Value);
+	UFUNCTION(Server, Reliable)
+	void ServerHammerRotateFinish();
+
 public:
+	UPROPERTY(VisibleAnywhere, Category="Timeline")
+	UTimelineComponent* TileMoveTimeline;
+	UPROPERTY(VisibleAnywhere, Category="Timeline")
+	UCurveFloat* TileMoveTimelineCurve;
+	
+	UPROPERTY(VisibleAnywhere, Category="Timeline")
+	UTimelineComponent* HammerRotateTimeline;
+	UPROPERTY(VisibleAnywhere, Category="Timeline")
+	UCurveVector* HammerRotateTimelineCurve;
 
 private:
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<F2DTArray> MapTile;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	TArray<FHammerStruct> Hammer;
 	
-		
+	FOnTimelineFloat TileMoveTimelineFunction;
+	FOnTimelineEvent TileMoveTimelineFinish;
+	
+	FOnTimelineVector HammerRotateTimelineFunction;
+	FOnTimelineEvent HammerRotateTimelineFinish;
+	
 };

@@ -47,6 +47,12 @@ ANMMountainDragon::ANMMountainDragon()
 	{
 		AttackMontage = Attack_Montage.Object;
 	}
+	
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> FlyAttack_Montage(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/MountainDragonFlyAttack.MountainDragonFlyAttack"));
+	if (FlyAttack_Montage.Succeeded())
+	{
+		FlyAttackMontage = FlyAttack_Montage.Object;
+	}
 
 	// Set AI Controller
 	AIControllerClass = ANMMountainDragonAIController::StaticClass();
@@ -94,34 +100,6 @@ ANMMountainDragon::ANMMountainDragon()
 		LandTimeline->SetTimelineFinishedFunc(LandTimelineFinish);
 	}
 	LandTimeline->SetLooping(false);
-	
-	// // Set Hammer Timeline
-	// HammerTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("HammerTimeline"));
-	// HammerTimelineFunction.BindUFunction(this, FName("HammerInterp"));
-	// HammerTimelineFinish.BindUFunction(this, FName("HammerFinish"));
-	//
-	// static ConstructorHelpers::FObjectFinder<UCurveFloat> Hammer_Curve(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/HammerCurve.HammerCurve"));
-	// if (Hammer_Curve.Succeeded())
-	// {
-	// 	HammerCurve = Hammer_Curve.Object;
-	// 	HammerTimeline->AddInterpFloat(HammerCurve, HammerTimelineFunction);
-	// 	HammerTimeline->SetTimelineFinishedFunc(HammerTimelineFinish);
-	// }
-	// HammerTimeline->SetLooping(false);
-	//
-	// // Set Tile Timeline
-	// TileTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("TileTimeline"));
-	// TileTimelineFunction.BindUFunction(this, FName("TileInterp"));
-	// TileTimelineFinish.BindUFunction(this, FName("TileFinish"));
-	//
-	// static ConstructorHelpers::FObjectFinder<UCurveFloat> Tile_Curve(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/TileCurve.TileCurve"));
-	// if (Tile_Curve.Succeeded())
-	// {
-	// 	TileCurve = Tile_Curve.Object;
-	// 	TileTimeline->AddInterpFloat(TileCurve, TileTimelineFunction);
-	// 	TileTimeline->SetTimelineFinishedFunc(TileTimelineFinish);
-	// }
-	// TileTimeline->SetLooping(false);
 
 	// Set Decal
 	static ConstructorHelpers::FObjectFinder<UMaterial> M_Decal(TEXT("/Game/Assets/Mesh/NewMaterial.NewMaterial"));
@@ -148,16 +126,11 @@ void ANMMountainDragon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(ANMMountainDragon, bIsBattleState);
 	DOREPLIFETIME(ANMMountainDragon, bGlide);
 	DOREPLIFETIME(ANMMountainDragon, bFly);
-	// DOREPLIFETIME(ANMMountainDragon, bFireBallAttack);
-	// DOREPLIFETIME(ANMMountainDragon, bFireSpreadAttack);
-	// DOREPLIFETIME(ANMMountainDragon, Hammer);
-	// DOREPLIFETIME(ANMMountainDragon, HammerDir);
 }
 
 void ANMMountainDragon::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	
 }
 
@@ -246,22 +219,6 @@ void ANMMountainDragon::ServerTakeOffInterp_Implementation(float Value)
 void ANMMountainDragon::ServerTakeOffFinish_Implementation()
 {
 	TakeOffEnd.Broadcast();
-	
-	// if (HasAuthority())
-	// {
-	// 	TakeOffEnd.Broadcast();
-	// 	if (bFly)
-	// 	{
-	// 		if (!FlyFireAttack)
-	// 			FireSpreadAttack();
-	// 		else
-	// 			FireBallAttack();
-	// 	}
-	// 	else if (bGlideAttack)
-	// 	{
-	// 		GetCharacterMovement()->MaxFlySpeed = 1800.0f;
-	// 	}
-	// }
 }
 
 void ANMMountainDragon::ServerLand_Implementation()
@@ -280,44 +237,123 @@ void ANMMountainDragon::ServerLandFinish_Implementation()
 {
 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	LandEnd.Broadcast();
-	
-	// if (HasAuthority())
-	// {
-	// 	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	// 	auto* NMAIController = Cast<ANMMountainDragonAIController>(GetController());
-	//
-	// 	if (bFly)
-	// 	{
-	// 		bFly = false;
-	//
-	// 		if (!FlyFireAttack)
-	// 		{
-	// 			NMAIController->GetBlackboardComponent()->SetValueAsBool(NMAIController->CanFireSpreadAttackKey, false);
-	// 			FlyFireAttack = true;
-	// 		}
-	// 		else
-	// 		{
-	// 			NMAIController->GetBlackboardComGponent()->SetValueAsBool(NMAIController->CanFireBallAttackKey, false);
-	// 		}
-	// 	}
-	// 	else if (bGlideAttack)
-	// 	{
-	// 		GetCharacterMovement()->MaxFlySpeed = 600.0f;
-	// 		bGlideAttack = false;
-	// 		
-	// 		NMAIController->GetBlackboardComponent()->SetValueAsBool(NMAIController->CanGlideAttackKey, false);
-	// 	}
-	// }
 }
 
-void ANMMountainDragon::EndFly_Implementation()
+void ANMMountainDragon::ServerFireSpreadAttack_Implementation()
 {
-	if (FlyFireAttack)
+	MulticastFireSpreadAttack();
+
+	// 타일 및 해머 생성
+	MapManager->CreateTile(BaseLocation, 5, 5);
+	MapManager->CreateHammer(BaseLocation, 5);
+
+	// 기존 바닥 삭제
+	for (TActorIterator<AStaticMeshActor> It(GetWorld()); It; ++It)
+	{
+		if (*It->GetName() == FString("SM_FloatingIsland_L_Island2"))
+		{
+			(*It)->Destroy();
+		}
+	}
+}
+
+void ANMMountainDragon::MulticastFireSpreadAttack_Implementation()
+{
+	auto* NMAnim = Cast<UNMMountainDragonAnimInstance>(GetMesh()->GetAnimInstance());
+	if (NMAnim)
+	{
+		NMAnim->Montage_Play(FlyAttackMontage);
+		NMAnim->Montage_JumpToSection(FName("FireSpreadAttack"));
+	}
+}
+
+void ANMMountainDragon::ServerFireSpreadAttackFinished_Implementation()
+{
+	FireSpreadAttackEnd.Broadcast();
+}
+
+void ANMMountainDragon::ServerGlideAttack_Implementation()
+{
+	MulticastGlideAttack();
+
+	FTimerHandle GlideAttackTimerHandle;
+	float GlideAttackTime = 5.0f;
+	GetWorld()->GetTimerManager().SetTimer(GlideAttackTimerHandle, FTimerDelegate::CreateLambda([&]() -> void
+	{
+		// check collision
+		UWorld* World = GetWorld();
+		FVector Center = FVector(BaseLocation.X, BaseLocation.Y, 4000.0f);
+		FVector Size = FVector(750.0f, 1250.0f, 500.0f);
+
+		if (World && HasAuthority())
+		{
+			TArray<FOverlapResult> OverlapResults;
+			FCollisionQueryParams Params(NAME_None, false, this);
+			bool bResult = World->OverlapMultiByChannel(
+				OverlapResults,
+				Center,
+				FQuat::Identity,
+				ECC_EnemyAttack,
+				FCollisionShape::MakeBox(Size),
+				Params
+			);
+
+			if (bResult)
+			{
+				for (auto OverlapResult : OverlapResults)
+				{
+					ANMCharacter* NMCharacter = Cast<ANMCharacter>(OverlapResult.GetActor());
+					if (NMCharacter)
+					{
+						DrawDebugBox(World, Center, Size, FColor::Green, false, 3.5f);
+
+						NMCharacter->Combat->TakeDamage(25.0f);
+					}
+				}
+			}
+			else
+			{
+				DrawDebugBox(World, Center, Size, FColor::Red, false, 3.5f);
+			}
+		}
+		GlideAttackEnd.Broadcast();
+		
+		GetWorld()->GetTimerManager().ClearTimer(GlideAttackTimerHandle);
+	}), GlideAttackTime, false);
+}
+
+void ANMMountainDragon::MulticastGlideAttack_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ADecalActor* DecalActor = World->SpawnActor<ADecalActor>(FVector(BaseLocation.X, BaseLocation.Y, 4000.0f), FRotator::ZeroRotator);
+
+		if (DecalActor)
+		{
+			DecalActor->SetDecalMaterial(DecalMaterial);
+			DecalActor->SetLifeSpan(5.0f);
+			DecalActor->GetDecal()->DecalSize = FVector(1.0f, 1250.0f, 750.0f);
+		}
+	}
+}
+
+void ANMMountainDragon::ServerFireBallAttack_Implementation()
+{
+	// play Montage, draw attack range decal
+	MulticastFireBallAttack();
+
+	FTimerHandle FireBallAttackTimerHandle;
+	float FireBallAttackTime = 10.0f;
+	GetWorld()->GetTimerManager().SetTimer(FireBallAttackTimerHandle, FTimerDelegate::CreateLambda([&]() -> void
 	{
 		// check collision
 		UWorld* World = GetWorld();
 		FVector Center = FVector(BaseLocation.X, BaseLocation.Y, 4000.0f);
 		float Radius = 2000.0f;
+
+		float MaxDamge = 50.0f;
+		float MinDamage = 0.0f;
 
 		if (World && HasAuthority())
 		{
@@ -340,7 +376,7 @@ void ANMMountainDragon::EndFly_Implementation()
 						DrawDebugSphere(World, Center, Radius, 16, FColor::Green, false, 0.5f);
 
 						float distance = (NMCharacter->GetActorLocation() - Center).Size();
-						NMCharacter->Combat->TakeDamage(UKismetMathLibrary::MapRangeClamped(distance, 0, 2000, 50, 0));
+						NMCharacter->Combat->TakeDamage(UKismetMathLibrary::MapRangeClamped(distance, 0.0f, Radius, MaxDamge, MinDamage));
 					}
 				}
 			}
@@ -349,160 +385,21 @@ void ANMMountainDragon::EndFly_Implementation()
 				DrawDebugSphere(World, Center, Radius, 16, FColor::Red, false, 0.5f);
 			}
 		}
-	}
-	
-	
-	// bFireSpreadAttack = false;
-	// bFireBallAttack = false;
+		FireBallAttackEnd.Broadcast();
 
-	OldLocation = GetActorLocation();
-	LandTimeline->PlayFromStart();
+		GetWorld()->GetTimerManager().ClearTimer(FireBallAttackTimerHandle);
+	}), FireBallAttackTime, false);
 }
 
-void ANMMountainDragon::StartGlide_Implementation()
+void ANMMountainDragon::MulticastFireBallAttack_Implementation()
 {
-	GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-	// bGlideAttack = true;
-	
-	OldLocation = GetActorLocation();
-	TakeOffTimeline->PlayFromStart();
-}
-
-void ANMMountainDragon::GlideAttack_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
+	auto* NMAnim = Cast<UNMMountainDragonAnimInstance>(GetMesh()->GetAnimInstance());
+	if (NMAnim)
 	{
-		ADecalActor* DecalActor = World->SpawnActor<ADecalActor>(FVector(BaseLocation.X, BaseLocation.Y, 4000.0f), FRotator::ZeroRotator);
-
-		if (DecalActor)
-		{
-			DecalActor->SetDecalMaterial(DecalMaterial);
-			DecalActor->SetLifeSpan(5.0f);
-			DecalActor->GetDecal()->DecalSize = FVector(1.0f, 1250.0f, 750.0f);
-		}
-	}
-}
-
-void ANMMountainDragon::EndGlide_Implementation()
-{
-	// check collision
-	UWorld* World = GetWorld();
-	FVector Center = FVector(BaseLocation.X, BaseLocation.Y, 4000.0f);
-	FVector Size = FVector(750.0f, 1250.0f, 500.0f);
-
-	if (World && HasAuthority())
-	{
-		TArray<FOverlapResult> OverlapResults;
-		FCollisionQueryParams Params(NAME_None, false, this);
-		bool bResult = World->OverlapMultiByChannel(
-			OverlapResults,
-			Center,
-			FQuat::Identity,
-			ECC_EnemyAttack,
-			FCollisionShape::MakeBox(Size),
-			Params
-		);
-
-		if (bResult)
-		{
-			for (auto OverlapResult : OverlapResults)
-			{
-				ANMCharacter* NMCharacter = Cast<ANMCharacter>(OverlapResult.GetActor());
-				if (NMCharacter)
-				{
-					DrawDebugBox(World, Center, Size, FColor::Green, false, 3.5f);
-
-					NMCharacter->Combat->TakeDamage(25.0f);
-				}
-			}
-		}
-		else
-		{
-			DrawDebugBox(World, Center, Size, FColor::Red, false, 3.5f);
-		}
+		NMAnim->Montage_Play(FlyAttackMontage);
+		NMAnim->Montage_JumpToSection(FName("FireBallAttack"));
 	}
 	
-	
-	OldLocation = GetActorLocation();
-	LandTimeline->PlayFromStart();
-}
-
-void ANMMountainDragon::FireSpreadAttack_Implementation()
-{
-	if (HasAuthority())
-	{
-		NMLOG_S(Warning);
-
-		// bFireSpreadAttack = true;
-
-		MapManager->CreateTile(BaseLocation, 5, 5);
-		MapManager->CreateHammer(BaseLocation, 5);
-	}
-		
-	// bFireSpreadAttack = true;
-	//
-	// if (!HasAuthority())
-	// 	return;
-	//
-	// // 타일, 망치 생성
-	// UWorld* World = this->GetWorld();
-	// if (World)
-	// {
-	// 	for (int i = 0; i < 5; i++)
-	// 	{
-	// 		MapTile.Add(F2DTArray());
-	// 		int temp = FMath::RandRange(0, 1);
-	// 		int temp2 = temp ? 1 : -1;
-	// 		MapTile[i].Dir = temp2;
-	// 		
-	// 		for (int j = 0; j < 5; j++)
-	// 		{
-	// 			FVector Loc;
-	// 			Loc.X = BaseLocation.X - 1000 + (j * 500);
-	// 			Loc.Y = BaseLocation.Y - 1000 + (i * 500);
-	// 			Loc.Z = 4000.0f;
-	// 			
-	// 			MapTile[i].Add(FTileStruct(World->SpawnActor<ATile>(ATile::StaticClass(), Loc, FRotator::ZeroRotator), Loc.X, Loc.Y));
-	// 		}
-	// 	}
-	// 	
-	// 	for (int i = 0; i < 5; i++)
-	// 	{
-	// 		FVector Loc;
-	// 		Loc.X = BaseLocation.X + (MapTile[i].Dir * 1400.0f);
-	// 		Loc.Y = BaseLocation.Y - 1000 + (i * 500);
-	// 		Loc.Z = 4100.0f;
-	// 	
-	// 		FRotator Rot;
-	// 		Rot.Roll = 0.0f;
-	// 		Rot.Yaw = 0.0f;
-	// 		Rot.Pitch = MapTile[i].Dir * 150.0f;
-	// 	
-	// 		UObject* Object = StaticLoadObject(UObject::StaticClass(), nullptr, TEXT("/Game/Assets/Mesh/hammer.hammer"));
-	// 		UBlueprint* BP = Cast<UBlueprint>(Object);
-	// 		TSubclassOf<class UObject> BP_Hammer = static_cast<UClass*>(BP->GeneratedClass);
-	// 		World->SpawnActor<AActor>(BP_Hammer, Loc, Rot);
-	// 		// AddHammer(World->SpawnActor<ATile>(ATile::StaticClass(), Loc, Rot), temp);
-	// 	}
-	// 	HammerTimeline->PlayFromStart();
-	// }
-	//
-	// // 기존 바닥 삭제
-	// for (TActorIterator<AStaticMeshActor> It(GetWorld()); It; ++It)
-	// {
-	// 	if (*It->GetName() == FString("SM_FloatingIsland_L_Island2"))
-	// 	{
-	// 		(*It)->Destroy();
-	// 	}
-	// }
-
-}
-
-void ANMMountainDragon::FireBallAttack_Implementation()
-{
-	// bFireBallAttack = true;
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -516,51 +413,3 @@ void ANMMountainDragon::FireBallAttack_Implementation()
 		}
 	}
 }
-
-
-// void ANMMountainDragon::HammerInterp_Implementation(float Value)
-// {
-// 	// for (int i = 0; i < 5; i++)
-// 	// {
-// 	// 	FRotator Rot;
-// 	// 	Rot.Roll = 0.0f;
-// 	// 	Rot.Yaw = 0.0f;
-// 	// 	Rot.Pitch =  150 * Hammer[i].Dir * Value;
-// 	//
-// 	// 	Hammer[i].Actor->SetActorRotation(Rot);
-// 	// }
-// }
-//
-// void ANMMountainDragon::HammerFinish_Implementation()
-// {
-// 	if (HasAuthority())
-// 	{
-// 		TileTimeline->PlayFromStart();
-// 	}
-// }
-//
-// void ANMMountainDragon::TileInterp_Implementation(float Value)
-// {
-// 	// for (int i = 0; i < 5; i++)
-// 	// {
-// 	// 	for (int j = 0; j < 5; j++)
-// 	// 	{
-// 	// 		FVector NewLocation;
-// 	// 		NewLocation.X = FMath::Lerp(MapTile[i][j].X, MapTile[i][j].X - (MapTile[i].Dir * 500), Value);
-// 	// 		NewLocation.Y = MapTile[i][j].Actor->GetActorLocation().Y;
-// 	// 		NewLocation.Z = MapTile[i][j].Actor->GetActorLocation().Z;
-// 	// 		MapTile[i][j].Actor->SetActorLocation(NewLocation);
-// 	// 	}
-// 	// }
-// }
-//
-// void ANMMountainDragon::TileFinish_Implementation()
-// {
-// 	if (HasAuthority())
-// 	{
-// 		// for (int i = 0; i < 5; i++)
-// 		// 	MapTile[i].Actor->Destroy();
-//
-// 		EndFly();
-// 	}
-// }
