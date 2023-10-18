@@ -21,6 +21,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void SetOverlappingWeapon(class AWeapon* Weapon);
+	void SetOverlappingActor(AActor* Actor);
 	
 	bool CheckCanStand(float HalfHeight);
 	
@@ -58,7 +59,7 @@ private:
 	void ServerProneButtonPressed();
 
 	UFUNCTION(Server, Reliable)
-	void ServerInteractButtonPressed();
+	void ServerInteractButtonPressed(bool Item);
 	
 	FOnTimelineFloat CrouchTimelineFunction;
 	FOnTimelineEvent CrouchTimelineFinish;
@@ -90,6 +91,9 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 	
+	UFUNCTION()
+	void OnRep_OverlappingActor(AActor* LastActor);
+	
 	
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -118,6 +122,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UCombatComponent* Combat;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UInventoryComponent* Inventory;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* SpringArm;
@@ -136,5 +143,8 @@ private:
 	
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
 	AWeapon* OverlappingWeapon;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_OverlappingActor)
+	AActor* OverlappingActor;
 
 };

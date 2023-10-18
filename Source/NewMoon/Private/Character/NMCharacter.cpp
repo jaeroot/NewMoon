@@ -5,7 +5,10 @@
 
 #include "Character/NMCharacterMovementComponent.h"
 #include "Components/CombatComponent.h"
+#include "Components/InventoryComponent.h"
+#include "Components/ItemInterface.h"
 #include "Components/WidgetComponent.h"
+#include "Item/Item.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon.h"
 
@@ -112,13 +115,9 @@ ANMCharacter::ANMCharacter(const FObjectInitializer& ObjectInitializer)
 	Combat->NMCharacter = this;
 	Combat->SetMaxHP(100.0f);
 
-	// Set UI WIdget
-	// static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD_C(TEXT("/Game/Blueprints/UI/WB_Main.WB_Main_C"));
-	// if (UI_HUD_C.Succeeded())
-	// {
-	// 	HPBarWidgetClass = UI_HUD_C.Class;
-	// }
-	
+	// Set Inventory
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	Inventory->SetIsReplicated(true);	
 }
 
 void ANMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -126,14 +125,13 @@ void ANMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME_CONDITION(ANMCharacter, OverlappingWeapon, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(ANMCharacter, OverlappingActor, COND_OwnerOnly);
 }
 
 void ANMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// HPBarWidget = CreateWidget<UUserWidget>(Cast<APlayerController>(GetController()), HPBarWidgetClass);
-	// HPBarWidget->AddToViewport();
 }
 
 void ANMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -290,24 +288,57 @@ void ANMCharacter::AttackButtonPressed()
 
 void ANMCharacter::InteractButtonPressed()
 {
-	if (Combat)
+	if (OverlappingActor != nullptr && OverlappingActor->GetClass()->ImplementsInterface(UItemInterface::StaticClass()))	 // 아이템
 	{
-		if (HasAuthority())
+		if (Inventory)
 		{
-			Combat->EquipWeapon(OverlappingWeapon);
+			if (HasAuthority())
+			{
+				auto item = Cast<AItem>(OverlappingActor);
+				Inventory->AddToInventory(item->Interact());
+				SetOverlappingActor(nullptr);
+				item->Destroy();
+			}
+			else
+			{
+				ServerInteractButtonPressed(true);
+			}
 		}
-		else
+	}
+	else	// 무기
+	{
+		if (Combat)
 		{
-			ServerInteractButtonPressed();
+			if (HasAuthority())
+			{
+				Combat->EquipWeapon(OverlappingWeapon);
+			}
+			else
+			{
+				ServerInteractButtonPressed(false);
+			}
 		}
 	}
 }
 
-void ANMCharacter::ServerInteractButtonPressed_Implementation()
+void ANMCharacter::ServerInteractButtonPressed_Implementation(bool Item)
 {
-	if (Combat)
+	if (Item)
 	{
-		Combat->EquipWeapon(OverlappingWeapon);
+		if (Inventory)
+		{
+			auto item = Cast<AItem>(OverlappingActor);
+			Inventory->AddToInventory(item->Interact());
+			SetOverlappingActor(nullptr);
+			item->Destroy();
+		}
+	}
+	else
+	{
+		if (Combat)
+		{
+			Combat->EquipWeapon(OverlappingWeapon);
+		}
 	}
 }
 
@@ -439,12 +470,20 @@ bool ANMCharacter::IsWeaponEquipped()
 	return false;
 }
 
-
 void ANMCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	OverlappingWeapon = Weapon;
 }
 
 void ANMCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
+{
+}
+
+void ANMCharacter::SetOverlappingActor(AActor* Actor)
+{
+	OverlappingActor = Actor;
+}
+
+void ANMCharacter::OnRep_OverlappingActor(AActor* LastActor)
 {
 }

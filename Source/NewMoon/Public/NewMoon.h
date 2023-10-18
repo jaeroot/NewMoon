@@ -24,7 +24,6 @@ enum class ECharacterState : uint8
 	ECS_MAX UMETA(DisplayName = "DefaultMax")
 };
 
-
 DECLARE_LOG_CATEGORY_EXTERN(NewMoon, Log, All);
 #define NMLOG_CALLINFO (FString(__FUNCTION__) + TEXT("(") + FString::FromInt(__LINE__) + TEXT(")"))
 #define NMLOG_S(Verbosity) UE_LOG(NewMoon, Verbosity, TEXT("%s"), *NMLOG_CALLINFO)
@@ -36,3 +35,4 @@ DECLARE_LOG_CATEGORY_EXTERN(NewMoon, Log, All);
 #define ECC_EnemyAttack ECC_GameTraceChannel2
 #define ECC_NMCharacter ECC_GameTraceChannel1
 #define ECC_PlayerAttack ECC_GameTraceChannel3
+
