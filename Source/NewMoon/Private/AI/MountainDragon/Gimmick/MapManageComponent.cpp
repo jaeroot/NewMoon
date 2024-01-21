@@ -9,6 +9,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Curves/CurveFloat.h"
 #include "Curves/CurveVector.h"
+#include "GameFramework/GameStateBase.h"
 
 UMapManageComponent::UMapManageComponent()
 {
@@ -30,7 +31,7 @@ UMapManageComponent::UMapManageComponent()
 
 	// Hammer Rotation Timeline
 	HammerRotateTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("HammerRotateTimeline"));
-	HammerRotateTimelineFunction.BindUFunction(this, FName("MulticastHammerRotateInterp"));
+	HammerRotateTimelineFunction.BindUFunction(this, FName("ServerHammerRotateInterp"));
 	HammerRotateTimelineFinish.BindUFunction(this, FName("ServerHammerRotateFinish"));
 
 	static ConstructorHelpers::FObjectFinder<UCurveVector> Hammer_Curve(TEXT("/Game/Blueprints/AI/MountainDragon/Animations/HammerCurve.HammerCurve"));
@@ -146,13 +147,20 @@ void UMapManageComponent::CreateHammer(FVector BaseLocation, int Num)
 	HammerRotateTimeline->PlayFromStart();
 }
 
-void UMapManageComponent::MulticastHammerRotateInterp_Implementation(FVector Value)
+void UMapManageComponent::ServerHammerRotateInterp_Implementation(FVector Value)
 {
 	for (auto hammer : Hammer)
 	{
 		FRotator Rot = FRotator(150 * hammer.Dir * Value.X, Value.Y, Value.Z);
-
+		
 		hammer.Actor->SetActorRotation(Rot);
+
+		if (Value.X == 1.0f)
+		{
+			auto HammerActor = Cast<AHammer>(hammer.Actor);
+			float Time = GetWorld()->GetTimeSeconds();
+			HammerActor->MulticastSync(Rot, hammer.Dir);
+		}
 	}
 }
 
@@ -160,4 +168,3 @@ void UMapManageComponent::ServerHammerRotateFinish_Implementation()
 {
 	TileMoveTimeline->PlayFromStart();
 }
-

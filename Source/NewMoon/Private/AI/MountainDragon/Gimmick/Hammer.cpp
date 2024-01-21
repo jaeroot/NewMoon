@@ -3,9 +3,12 @@
 
 #include "AI/MountainDragon/Gimmick/Hammer.h"
 
+#include "GameFramework/GameStateBase.h"
+#include "Kismet/KismetMathLibrary.h"
+
 AHammer::AHammer()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
@@ -49,5 +52,33 @@ void AHammer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!HasAuthority())
+	{
+		ClientTime += DeltaTime;
+
+		if (TotalTime + ClientTime > 9.0f)
+		{
+			return;
+		}
+		
+		bool bIsOdd = static_cast<int>(ClientTime) % 2 != 0;
+		float Value = ClientTime - static_cast<int>(ClientTime);
+		Value = bIsOdd ? 1 - Value : Value;
+
+		float Rot = UKismetMathLibrary::MapRangeClamped(Value, 0.0f, 1.0f, 150.0f, 0.0f);
+		FRotator NewRot = FRotator(Rot * Direction, 0.0f, 0.0f);
+		RootComponent->SetWorldRotation(NewRot);
+	}
 }
 
+void AHammer::MulticastSync_Implementation(FRotator NewRot, float NewDir)
+{
+	if (!HasAuthority())
+	{
+		TotalTime += ClientTime;
+		ClientTime = 0.0f;
+		RootComponent->SetWorldRotation(NewRot);
+		
+		Direction = NewDir;
+	}
+}

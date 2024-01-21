@@ -87,8 +87,8 @@ private:
 	UFUNCTION(Server, Reliable)
 	void ServerTileMoveFinish();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastHammerRotateInterp(FVector Value);
+	UFUNCTION(Server, Reliable)
+	void ServerHammerRotateInterp(FVector Value);
 	UFUNCTION(Server, Reliable)
 	void ServerHammerRotateFinish();
 

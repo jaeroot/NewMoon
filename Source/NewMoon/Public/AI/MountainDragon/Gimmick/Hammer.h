@@ -15,6 +15,9 @@ public:
 	AHammer();
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSync(FRotator NewRot, float NewDir);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -30,4 +33,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Mesh")
 	UStaticMeshComponent* Mesh2;
 
+	float TotalTime = 0.0f;
+	float ClientTime = 0.0f;
+	float Speed = 1.0f;
+	float Direction = 1.0f;
 };
