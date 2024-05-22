@@ -6,11 +6,6 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_FlyFireBallAttack.generated.h"
 
-struct FBTFlyFireBallAttackTaskMemory
-{
-	bool bIsFinished;
-};
-
 UCLASS()
 class NEWMOON_API UBTTask_FlyFireBallAttack : public UBTTaskNode
 {

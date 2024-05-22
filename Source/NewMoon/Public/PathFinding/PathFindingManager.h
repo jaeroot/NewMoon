@@ -8,6 +8,12 @@
 
 class UBoxComponent;
 
+/*
+ *** DEPRECATED ***
+ * 해당 기능은 Old 버전이며 현재는 사용하지 않음
+ * Nav3dSystem 프로젝트에서 별도로 개발중이며 추후 플러그인 형태로 사용할 예정
+ */
+
 UENUM()
 enum class EOctreeNum : uint16
 {
@@ -62,12 +68,18 @@ private:
 	void CheckCollision(FOctreeNode& Node, const FBox& Box1, const AActor* Actor);
 	void AddChildren(FOctreeNode& Node);
 	void DebugCollision(const FOctreeNode& Node);
+	void DrawDebugOctreeBox(const FOctreeNode& Node);
+
+	void BroadPhase();
 
 public:	
 
 private:
 	UPROPERTY()
 	UBoxComponent* Box;
+
+	UPROPERTY()
+	TArray<AActor*> CollisionItems;
 	
 	int32 MaxDepth;
 	

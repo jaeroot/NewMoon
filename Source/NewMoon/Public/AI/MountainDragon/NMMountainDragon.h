@@ -10,7 +10,6 @@
 DECLARE_MULTICAST_DELEGATE(FTakeOffEndDelegate);
 DECLARE_MULTICAST_DELEGATE(FLandEndDelegate);
 DECLARE_MULTICAST_DELEGATE(FFireSpreadAttackFinished);
-DECLARE_MULTICAST_DELEGATE(FFireBallAttackFinished);
 DECLARE_MULTICAST_DELEGATE(FGlideAttackFinished);
 
 UCLASS()
@@ -39,7 +38,6 @@ public:
 	FTakeOffEndDelegate TakeOffEnd;
 	FLandEndDelegate LandEnd;
 	FFireSpreadAttackFinished FireSpreadAttackEnd;
-	FFireBallAttackFinished FireBallAttackEnd;
 	FGlideAttackFinished GlideAttackEnd;
 
 	UFUNCTION(Server, Reliable)
@@ -61,6 +59,11 @@ public:
 
 	void SetFly(bool NewFly) { bFly = NewFly; }
 	void SetGlide(bool NewGlide) { bGlide = NewGlide; }
+
+	UFUNCTION()
+	FORCEINLINE void SetIsInProgress(const bool NewBool) { bIsInProgress = NewBool; }
+	UFUNCTION()
+	FORCEINLINE bool GetIsInProgress() const { return bIsInProgress; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -129,4 +132,7 @@ private:
 	UMaterial* DecalMaterial2;
 
 	class UMapManageComponent* MapManager;
+
+	UPROPERTY()
+	bool bIsInProgress;
 };

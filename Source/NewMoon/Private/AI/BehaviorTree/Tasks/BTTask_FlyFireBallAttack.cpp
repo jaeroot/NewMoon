@@ -21,22 +21,22 @@ EBTNodeResult::Type UBTTask_FlyFireBallAttack::ExecuteTask(UBehaviorTreeComponen
 		return EBTNodeResult::Failed;
 	}
 
-	FBTFlyFireBallAttackTaskMemory* MyMemory = CastInstanceNodeMemory<FBTFlyFireBallAttackTaskMemory>(NodeMemory);
-	MyMemory->bIsFinished = false;
-	
+	NMMountainDragon->SetIsInProgress(true);
 	NMMountainDragon->ServerFireBallAttack();
-	NMMountainDragon->FireBallAttackEnd.AddLambda([this, MyMemory]() -> void
-	{
-		MyMemory->bIsFinished = true;
-	});
 
 	return EBTNodeResult::InProgress;
 }
 
 void UBTTask_FlyFireBallAttack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	const FBTFlyFireBallAttackTaskMemory* MyMemory = CastInstanceNodeMemory<FBTFlyFireBallAttackTaskMemory>(NodeMemory);
-	if (MyMemory->bIsFinished)
+	auto* NMMountainDragon = Cast<ANMMountainDragon>(OwnerComp.GetAIOwner()->GetPawn());
+	if (NMMountainDragon == nullptr)
+	{
+		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+		return;
+	}
+
+	if (!NMMountainDragon->GetIsInProgress())
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}

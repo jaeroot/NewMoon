@@ -169,7 +169,7 @@ void ANMMountainDragon::ServerDamage_Implementation()
 {
 	auto* NMAIController = Cast<ANMMountainDragonAIController>(GetController());
 	auto* Target = Cast<ANMCharacter>(NMAIController->GetBlackboardComponent()->GetValueAsObject(NMAIController->TargetKey));
-
+	
 	if (Target)
 	{
 		Target->Combat->TakeDamage(5.0f);
@@ -385,7 +385,7 @@ void ANMMountainDragon::ServerFireBallAttack_Implementation()
 				DrawDebugSphere(World, Center, Radius, 16, FColor::Red, false, 0.5f);
 			}
 		}
-		FireBallAttackEnd.Broadcast();
+		bIsInProgress = false;
 
 		GetWorld()->GetTimerManager().ClearTimer(FireBallAttackTimerHandle);
 	}), FireBallAttackTime, false);

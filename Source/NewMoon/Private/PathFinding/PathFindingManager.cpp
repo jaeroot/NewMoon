@@ -13,22 +13,26 @@ APathFindingManager::APathFindingManager()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	SetRootComponent(Box);
 
-	MaxDepth = 4;
+	MaxDepth = 10;
 }
 
 void APathFindingManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	Root = FOctreeNode(GetComponentsBoundingBox(), 0);
-	ComposeOctree();
 
-	DebugCollision(Root);
+	
+	// Root = FOctreeNode(GetComponentsBoundingBox(), 0);
+	// ComposeOctree();
+	//
+	// DebugCollision(Root);
+	// DrawDebugOctreeBox(Root);
 }
 
 void APathFindingManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
 
 }
 
@@ -178,6 +182,49 @@ void APathFindingManager::DebugCollision(const FOctreeNode& Node)
 		for (auto n : Node.Children)
 		{
 			DebugCollision(n);
+		}
+	}
+}
+
+void APathFindingManager::DrawDebugOctreeBox(const FOctreeNode& Node)
+{
+	if (!Node.Children.IsEmpty())
+	{
+		for (auto c : Node.Children)
+		{
+			DrawDebugOctreeBox(c);
+		}
+	}
+	else
+	{
+		if (Node.Items.IsEmpty())
+		{
+			DrawDebugBox(GetWorld(), Node.Box.GetCenter(), Node.Box.GetExtent(), FColor::Green, false, 10.0f);
+		}
+		else
+		{
+			DrawDebugBox(GetWorld(), Node.Box.GetCenter(), Node.Box.GetExtent(), FColor::Red, false, 10.0f);
+		}
+			
+	}
+	
+}
+
+void APathFindingManager::BroadPhase()
+{
+	FBox ActorBoundingBox = GetComponentsBoundingBox();
+	
+	for(TActorIterator<AActor> ActorIT(GetWorld()); ActorIT; ++ActorIT)
+	{
+		if (*ActorIT == this)
+		{
+			continue;
+		}
+		
+		// Broad Phase Collision detection
+		if (AABB3D(ActorBoundingBox, ActorIT->GetComponentsBoundingBox()))
+		{
+			CollisionItems.Add(*ActorIT);
 		}
 	}
 }
